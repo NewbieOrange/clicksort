@@ -4,7 +4,7 @@
 	<groupId>me.desht</groupId>
 	<artifactId>clicksort</artifactId>
 	<packaging>jar</packaging>
-	<version>1.0</version>
+	<version>1.0.0</version>
 	<name>ClickSort</name>
 	<url>http://maven.apache.org</url>
 	<properties>

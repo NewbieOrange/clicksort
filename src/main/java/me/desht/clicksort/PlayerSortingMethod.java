@@ -31,7 +31,6 @@ public class PlayerSortingMethod {
 	public void load() {
 		YamlConfiguration conf = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), SORT_METHOD));
 		for (String k : conf.getKeys(false)) {
-			System.out.println(k + " = " + conf.getString(k));
 			map.put(k, SortingMethod.valueOf(conf.getString(k)));
 		}
 	}
