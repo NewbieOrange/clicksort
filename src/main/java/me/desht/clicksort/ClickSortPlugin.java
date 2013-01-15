@@ -93,6 +93,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 //		if (!event.isLeftClick()) return;
 		if (!(event.getWhoClicked() instanceof Player)) return;
 		if (!PermissionUtils.isAllowedTo((Player) event.getWhoClicked(), "clicksort.sort")) return;
+		if (event.getCurrentItem() == null) return;
 
 		Player player = (Player)event.getWhoClicked();
 		String playerName = player.getName();
