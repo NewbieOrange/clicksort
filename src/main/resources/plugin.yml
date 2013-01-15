@@ -1,0 +1,24 @@
+name: ClickSort
+main: me.desht.clicksort.ClickSortPlugin
+author: desht
+version: ${project.version}
+description: Super-convenient inventory sorting
+
+commands:
+  clicksort:
+    description: Manage the ClickSort plugin
+    usage: |
+      /<command> reload
+
+permissions:
+  clicksort.admin:
+    description: Full admin control for ClickSort
+    default: op
+    children:
+      clicksort.commands.reload: true
+  clicksort.commands.reload:
+    description: Allow use of the /clicksort reload command
+    default: op
+  clicksort.sort:
+    description: Allow inventory to be click-sorted
+    default: true
