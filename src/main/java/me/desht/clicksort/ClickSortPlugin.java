@@ -43,6 +43,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
 import org.mcstats.MetricsLite;
 
 public class ClickSortPlugin extends JavaPlugin implements Listener {
@@ -52,6 +53,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 	private final CommandManager cmds = new CommandManager(this);
 	private int doubleClickTime;
 	private PlayerSortingMethod sorting;
+	private BukkitTask saveTask;
 
 	@Override
 	public void onDisable() {
@@ -61,33 +63,25 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 
 	@Override
 	public void onEnable() { 
-
-		this.getConfig().options().copyDefaults(true);
-		this.getConfig().options().header("See http://dev.bukkit.org/server-mods/clicksort/pages/configuration");
-		this.saveConfig();
-
-		processConfig();
-
 		LogUtils.init(this);
 
 		PluginManager pm = this.getServer().getPluginManager();
 		pm.registerEvents(this, this);
 
 		cmds.registerCommand(new ReloadCommand());
+		
+		this.getConfig().options().copyDefaults(true);
+		this.getConfig().options().header("See http://dev.bukkit.org/server-mods/clicksort/pages/configuration");
+		this.saveConfig();
 
 		sorting = new PlayerSortingMethod(this);
 		sorting.load();
-		
+
+		processConfig();
+
 		setupMetrics();
-		
-		// save player sorting data every 5 mins if necessary
-		getServer().getScheduler().runTaskTimer(this, new Runnable() {
-			@Override
-			public void run() { sorting.autosave(); }
-		}, 20 * 300L, 20 * 300L);
 	}
-
-
+	
 	/**
 	 * Inventory click handler.  Run with priority HIGHEST - this makes it run late, giving protection
 	 * plugins a chance to cancel the inventory click event first.
@@ -96,35 +90,56 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 	 */
 	@EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
 	public void onInventoryClicked(final InventoryClickEvent event) {
-		if (!event.isLeftClick()) return;
+//		if (!event.isLeftClick()) return;
 		if (!(event.getWhoClicked() instanceof Player)) return;
 		if (!PermissionUtils.isAllowedTo((Player) event.getWhoClicked(), "clicksort.sort")) return;
 
 		Player player = (Player)event.getWhoClicked();
 		String playerName = player.getName();
 
+		LogUtils.fine("inventory click by player " + playerName);
+		
 		SortingMethod sortMethod = sorting.getSortingMethod(playerName);
+		ClickMethod clickMethod = sorting.getClickMethod(playerName);
 
 		if (event.getCurrentItem().getType() == Material.AIR &&	event.isShiftClick()) {
-			// shift-left-clicking an empty slot cycles sort method for the player
-			sortMethod = sortMethod.next();
-			sorting.setSortingMethod(playerName, sortMethod);
-			switch (sortMethod) {
-			case NONE:
-				MiscUtil.statusMessage(player, "Click-sorting has been disabled.");
-				break;
-			default:
-				String s = doubleClickTime > 0 ? "Double-click" : "Single-click an empty inventory slot";
-				MiscUtil.statusMessage(player, "Sort by " + sortMethod.toString() + ".  " + s + " to sort.");
+			if (event.isLeftClick()) {
+				// shift-left-clicking an empty slot cycles sort method for the player
+				sortMethod = sortMethod.next();
+				sorting.setSortingMethod(playerName, sortMethod);
+				switch (sortMethod) {
+				case NONE:
+					MiscUtil.statusMessage(player, "Click-sorting has been disabled.");
+					break;
+				default:
+					String s = clickMethod == ClickMethod.DOUBLE ? "Double-click" : "Single-click an empty inventory slot";
+					MiscUtil.statusMessage(player, "Sort by " + sortMethod.toString() + ".  " + s + " to sort.");
+				}
+				MiscUtil.statusMessage(player, "Shift-Left-click any empty inventory slot to change.");
+			} else if (event.isRightClick()) {
+				// shift-right-clicking an empty slot cycles click method for the player
+				clickMethod = clickMethod.next();
+				sorting.setClickMethod(playerName, clickMethod);
+				switch (clickMethod) {
+				case SINGLE:
+					MiscUtil.statusMessage(player, "Single-click mode: single-click an empty inventory slot to sort.");
+					break;
+				case DOUBLE:
+					MiscUtil.statusMessage(player, "Double-click mode: double-click any inventory slot to sort.");
+					break;
+				}
+				MiscUtil.statusMessage(player, "Shift-Right-click any empty inventory slot to change.");
 			}
-			MiscUtil.statusMessage(player, "Shift-left-click any empty inventory slot to change.");
-			sorting.save();
+			if (getConfig().getInt("autosave_seconds") == 0)
+				sorting.save();
 			return;
 		}
 
 		if (sortMethod == SortingMethod.NONE) return;
 
-		if (doubleClickTime > 0) {
+		if (!event.isLeftClick()) return;
+		
+		if (clickMethod == ClickMethod.DOUBLE) {
 			long now = System.currentTimeMillis();
 			long last = lastClickTime.containsKey(playerName) ? lastClickTime.get(playerName) : 0L;
 			int slot = lastClickSlot.containsKey(playerName) ? lastClickSlot.get(playerName) : -1;
@@ -150,7 +165,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 				lastClickTime.put(playerName, now);
 				lastClickSlot.put(playerName, event.getRawSlot());
 			}
-		} else if (doubleClickTime == 0 &&
+		} else if (clickMethod == ClickMethod.SINGLE &&
 				event.getCurrentItem().getType() == Material.AIR &&
 				event.getCursor().getType() == Material.AIR) {
 			// single-left-click to sort, but only if an empty slot is clicked
@@ -175,7 +190,16 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 	}
 
 	public void processConfig() {
-		doubleClickTime = getConfig().getInt("doubleclick_speed");
+		doubleClickTime = getConfig().getInt("doubleclick_speed_ms");
+
+		setupSaveTask();
+		
+		 String level = getConfig().getString("log_level");
+         try {
+                 LogUtils.setLogLevel(level);
+         } catch (IllegalArgumentException e) {
+                 LogUtils.warning("invalid log level " + level + " - ignored");
+         }
 	}
 
 	private void setupMetrics() {
@@ -185,6 +209,23 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 		} catch (IOException e) {
 			LogUtils.warning("Couldn't submit metrics stats: " + e.getMessage());
 		}
+	}
+
+	/**
+	 * Save player sorting data periodically if necessary
+	 */
+	private void setupSaveTask() {
+		if (saveTask != null) {
+			saveTask.cancel();
+		}
+		
+		int period = getConfig().getInt("autosave_seconds");
+		if (period <= 0) return;
+		
+		saveTask = getServer().getScheduler().runTaskTimer(this, new Runnable() {
+			@Override
+			public void run() { sorting.autosave(); }
+		}, 0L, 20L * period);
 	}
 
 	@SuppressWarnings("deprecation")
@@ -207,6 +248,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 			inv = event.getView().getBottomInventory();
 		}
 
+		LogUtils.fine("clicked inventory window " + inv.getType() + ", slot " + slot);
 		int min, max;  // slot range to sort
 		switch (inv.getType()) {
 		case PLAYER:
@@ -244,7 +286,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 		Map<String,Integer> amounts = new HashMap<String,Integer>();
 		Map<String,ItemMeta> metaMap = new HashMap<String,ItemMeta>();
 
-		//		System.out.println("min = " + min + ", max = " + max + ", size = " + res.length);
+		LogUtils.fine("sortAndMerge: min = " + min + ", max = " + max + ", size = " + res.length);
 		for (int i = 0; i < res.length; i++) {
 			ItemStack is = items[min + i];
 			String key;
@@ -290,7 +332,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 				throw new IllegalArgumentException("Unexpected value for sort method: " + sortMethod);
 			}
 			int maxStack = mat.getMaxStackSize();
-			//			System.out.println("max stack size for " + mat + " = " + maxStack);
+			LogUtils.finer("max stack size for " + mat + " = " + maxStack);
 			while (amount > maxStack) {
 				ItemStack is = new ItemStack(mat, maxStack, data);
 				is.setItemMeta(metaMap.get(fields[2]));

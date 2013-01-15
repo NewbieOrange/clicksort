@@ -28,8 +28,8 @@ import me.desht.dhutils.LogUtils;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 public class PlayerSortingMethod {
-	private static final String SORT_METHOD = "sorting.yml";
-	private Map<String,SortingMethod> map = new HashMap<String, SortingMethod>();
+	private static final String SORT_PREFS_FILE = "sorting.yml";
+	private Map<String,SortPrefs> map = new HashMap<String, SortPrefs>();
 	private ClickSortPlugin plugin;
 	private boolean changed;
 	
@@ -39,20 +39,34 @@ public class PlayerSortingMethod {
 	}
 	
 	public SortingMethod getSortingMethod(String playerName) {
-		if (!map.containsKey(playerName)) map.put(playerName, SortingMethod.ID);
-		return map.get(playerName);
+		return getPrefs(playerName).sortMethod;
+	}
+	
+	public ClickMethod getClickMethod(String playerName) {
+		return getPrefs(playerName).clickMethod;
 	}
 	
 	public void setSortingMethod(String playerName, SortingMethod sortMethod) {
-		map.put(playerName, sortMethod);
+		getPrefs(playerName).sortMethod = sortMethod;
 		changed = true;
 	}
 	
+	public void setClickMethod(String playerName, ClickMethod clickMethod) {
+		getPrefs(playerName).clickMethod = clickMethod;
+		changed = true;
+	}
+	
+	private SortPrefs getPrefs(String playerName) {
+		if (!map.containsKey(playerName)) map.put(playerName, new SortPrefs());
+		return map.get(playerName);
+	}
+	
 	public void load() {
-		YamlConfiguration conf = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), SORT_METHOD));
+		YamlConfiguration conf = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), SORT_PREFS_FILE));
 		for (String k : conf.getKeys(false)) {
-			map.put(k, SortingMethod.valueOf(conf.getString(k)));
+			map.put(k, new SortPrefs(conf.getString(k + ".sort"), conf.getString(k + ".click")));
 		}
+		LogUtils.fine("loaded player sorting preferences (" + map.size() + " records)");
 	}
 	
 	public void autosave() {
@@ -62,16 +76,30 @@ public class PlayerSortingMethod {
 	public void save() {
 		YamlConfiguration conf = new YamlConfiguration();
 		
-		for (Entry<String,SortingMethod> entry : map.entrySet()) {
-			conf.set(entry.getKey(), entry.getValue().toString());
+		for (Entry<String,SortPrefs> entry : map.entrySet()) {
+			conf.set(entry.getKey() + ".sort", entry.getValue().sortMethod.toString());
+			conf.set(entry.getKey() + ".click", entry.getValue().clickMethod.toString());
 		}
 		
 		try {
-			conf.save(new File(plugin.getDataFolder(), SORT_METHOD));
+			conf.save(new File(plugin.getDataFolder(), SORT_PREFS_FILE));
 		} catch (IOException e) {
-			LogUtils.severe("can't save " + SORT_METHOD + ": " + e.getMessage());
+			LogUtils.severe("can't save " + SORT_PREFS_FILE + ": " + e.getMessage());
 		}
-		
+		LogUtils.fine("saved player sorting preferences (" + map.size() + " records)");
 		changed = false;
+	}
+	
+	private class SortPrefs {
+		public SortingMethod sortMethod;
+		public ClickMethod clickMethod;
+		public SortPrefs() {
+			sortMethod = SortingMethod.ID;
+			clickMethod = ClickMethod.DOUBLE;
+		}
+		public SortPrefs(String sort, String click) {
+			sortMethod = SortingMethod.valueOf(sort);
+			clickMethod = ClickMethod.valueOf(click);
+		}
 	}
 }
