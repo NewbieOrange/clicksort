@@ -3,6 +3,7 @@ main: me.desht.clicksort.ClickSortPlugin
 author: desht
 version: ${project.version}
 description: Super-convenient inventory sorting
+website: http://dev.bukkit.org/server-mods/clicksort
 
 commands:
   clicksort:
