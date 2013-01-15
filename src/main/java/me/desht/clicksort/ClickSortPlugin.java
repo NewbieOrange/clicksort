@@ -56,32 +56,35 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 	private BukkitTask saveTask;
 
 	@Override
-	public void onDisable() {
-		saveConfig();
-		sorting.save();
-	}
-
-	@Override
 	public void onEnable() { 
 		LogUtils.init(this);
-
+	
 		PluginManager pm = this.getServer().getPluginManager();
 		pm.registerEvents(this, this);
-
+	
 		cmds.registerCommand(new ReloadCommand());
 		
 		this.getConfig().options().copyDefaults(true);
 		this.getConfig().options().header("See http://dev.bukkit.org/server-mods/clicksort/pages/configuration");
 		this.saveConfig();
-
+	
 		sorting = new PlayerSortingPrefs(this);
 		sorting.load();
-
+	
 		processConfig();
-
+	
 		setupMetrics();
 	}
-	
+
+	@Override
+	public void onDisable() {
+		saveConfig();
+		sorting.save();
+		if (saveTask != null) {
+			saveTask.cancel();
+		}
+	}
+
 	/**
 	 * Inventory click handler.  Run with priority HIGHEST - this makes it run late, giving protection
 	 * plugins a chance to cancel the inventory click event first.
@@ -90,12 +93,11 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 	 */
 	@EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
 	public void onInventoryClicked(final InventoryClickEvent event) {
-//		if (!event.isLeftClick()) return;
 		if (!(event.getWhoClicked() instanceof Player)) return;
-		if (!PermissionUtils.isAllowedTo((Player) event.getWhoClicked(), "clicksort.sort")) return;
 		if (event.getCurrentItem() == null) return;
-
 		Player player = (Player)event.getWhoClicked();
+		if (!PermissionUtils.isAllowedTo(player, "clicksort.sort")) return;
+
 		String playerName = player.getName();
 
 		LogUtils.fine("inventory click by player " + playerName);
@@ -214,6 +216,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 	private void setupSaveTask() {
 		if (saveTask != null) {
 			saveTask.cancel();
+			saveTask = null;
 		}
 		
 		int period = getConfig().getInt("autosave_seconds");
@@ -270,8 +273,6 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 		for (int i = 0; i < sortedItems.length; i++) {
 			ItemStack is = sortedItems[i];
 			inv.setItem(min + i, is);
-			//			if (is == null) System.out.println(i + ") null");
-			//			else System.out.println(i + ") " + is.getTypeId() + ":" + is.getDurability() + " = " + is);
 		}
 
 		Player p = (Player)event.getWhoClicked();
@@ -283,23 +284,25 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 		Map<String,Integer> amounts = new HashMap<String,Integer>();
 		Map<String,ItemMeta> metaMap = new HashMap<String,ItemMeta>();
 
+		// phase 1: extract a list of unique material/data/item-meta strings and use those as keys
+		// into a hash which maps items to quantities
 		LogUtils.fine("sortAndMerge: min = " + min + ", max = " + max + ", size = " + res.length);
 		for (int i = 0; i < res.length; i++) {
 			ItemStack is = items[min + i];
 			String key;
-			if (is == null) {
-				key = sortMethod == SortingMethod.ID ? "0:0:" : "AIR:0";
-			} else {
+			if (is != null) {
 				ItemMeta meta = is.getItemMeta();
-				Map<String,Object> map =  meta == null ? null : is.getItemMeta().serialize();
-				String metaStr = metaToString(map);
+				Map<String,Object> m = meta == null ? null : is.getItemMeta().serialize();
+				String metaStr = metaToString(m);
 				switch (sortMethod) {
 				case ID:
-					key = String.format("%03d:%05d:%s", is.getTypeId(), is.getDurability(), metaStr); break;
+					key = String.format("%03d:%05d:%s:%d", is.getTypeId(), is.getDurability(), metaStr, is.getTypeId());
+					break;
 				case NAME: 
 					String name = ItemNames.lookup(is);
 					if (name == null) name = is.getType().toString();
-					key = String.format("%s:%05d:%s:%d", name, is.getDurability(), metaStr, is.getTypeId()); break;
+					key = String.format("%s:%05d:%s:%d", name, is.getDurability(), metaStr, is.getTypeId());
+					break;
 				default:
 					throw new IllegalArgumentException("Unexpected value for sort method: " + sortMethod);	
 				}
@@ -313,23 +316,16 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 				metaMap.put(metaStr, meta);
 			}
 		}
-
+		
+		// phase 2: sort the extracted item keys and reconstruct the item stacks from those keys
 		int i = 0;
 		for (String str : MiscUtil.asSortedList(amounts.keySet())) {
 			int amount = amounts.get(str);
 			String[] fields = str.split(":");
+			Material mat = Material.getMaterial(Integer.parseInt(fields[3]));
 			short data = (short)Integer.parseInt(fields[1]);
-			Material mat;
-			switch (sortMethod) {
-			case ID:
-				mat = Material.getMaterial(Integer.parseInt(fields[0])); break;
-			case NAME: 
-				mat = Material.getMaterial(Integer.parseInt(fields[3])); break;
-			default:
-				throw new IllegalArgumentException("Unexpected value for sort method: " + sortMethod);
-			}
 			int maxStack = mat.getMaxStackSize();
-			LogUtils.finer("max stack size for " + mat + " = " + maxStack);
+			LogUtils.finer("max stack size for " + mat + " = " + maxStack);			
 			while (amount > maxStack) {
 				ItemStack is = new ItemStack(mat, maxStack, data);
 				is.setItemMeta(metaMap.get(fields[2]));
