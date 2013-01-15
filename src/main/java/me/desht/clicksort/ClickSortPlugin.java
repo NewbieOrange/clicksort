@@ -76,8 +76,6 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 
 		cmds.registerCommand(new ReloadCommand());
 
-		ItemDB.init(this);
-		
 		sorting = new PlayerSortingMethod(this);
 		sorting.load();
 		
@@ -190,15 +188,12 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 		int rawSlot = event.getRawSlot();
 		int slot = event.getView().convertSlot(rawSlot);
 
-		//		LogUtils.fine("sorting! rawSlot=" + rawSlot + ", slot=" + slot);
-
 		if (slot == rawSlot) {
 			// upper inv was clicked
 			inv = event.getView().getTopInventory();
-
-			if (inv.getType() == InventoryType.CRAFTING && slot > 4) {
-				// is this a Bukkit bug? clicking a player inventory when the crafting/player view is up
-				// seems to give rawSlot==localSlot, implying the upper inventory (crafting) has been clicked
+			if (slot >= inv.getSize()) {
+				// is this a Bukkit bug? clicking a player inventory when the crafting or dispenser view is up
+				// seems to give rawSlot==localSlot, implying the upper inventory (crafting/dispenser) has been clicked
 				// when in fact the lower inventory (player) was clicked
 				inv = event.getView().getBottomInventory();
 			}
@@ -258,7 +253,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 				case ID:
 					key = String.format("%03d:%05d:%s", is.getTypeId(), is.getDurability(), metaStr); break;
 				case NAME: 
-					String name = ItemDB.lookup(is);
+					String name = ItemNames.lookup(is);
 					if (name == null) name = is.getType().toString();
 					key = String.format("%s:%05d:%s:%d", name, is.getDurability(), metaStr, is.getTypeId()); break;
 				default:
