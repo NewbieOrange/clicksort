@@ -38,7 +38,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -80,11 +79,17 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 		sorting.load();
 		
 		setupMetrics();
+		
+		// save player sorting data every 5 mins if necessary
+		getServer().getScheduler().runTaskTimer(this, new Runnable() {
+			@Override
+			public void run() { sorting.autosave(); }
+		}, 20 * 300L, 20 * 300L);
 	}
 
 
 	/**
-	 * Inventory click handler.  Run with priority HIGHEST - this make it run late, giving protection
+	 * Inventory click handler.  Run with priority HIGHEST - this makes it run late, giving protection
 	 * plugins a chance to cancel the inventory click event first.
 	 * 
 	 * @param event
