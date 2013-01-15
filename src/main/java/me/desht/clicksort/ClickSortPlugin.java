@@ -52,7 +52,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 	private final Map<String, Integer> lastClickSlot = new HashMap<String, Integer>();
 	private final CommandManager cmds = new CommandManager(this);
 	private int doubleClickTime;
-	private PlayerSortingMethod sorting;
+	private PlayerSortingPrefs sorting;
 	private BukkitTask saveTask;
 
 	@Override
@@ -74,7 +74,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 		this.getConfig().options().header("See http://dev.bukkit.org/server-mods/clicksort/pages/configuration");
 		this.saveConfig();
 
-		sorting = new PlayerSortingMethod(this);
+		sorting = new PlayerSortingPrefs(this);
 		sorting.load();
 
 		processConfig();
@@ -156,9 +156,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 				final SortingMethod sortMethod2 = sortMethod;
 				Bukkit.getScheduler().runTask(this, new Runnable() {
 					@Override
-					public void run() {
-						sortInventory(event, sortMethod2);
-					}
+					public void run() { sortInventory(event, sortMethod2); }
 				});
 			} else {
 				// last click was too long ago, or on a different inventory slot - record this
@@ -173,9 +171,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 			final SortingMethod sortMethod2 = sortMethod;
 			Bukkit.getScheduler().runTask(this, new Runnable() {
 				@Override
-				public void run() {
-					sortInventory(event, sortMethod2);
-				}
+				public void run() { sortInventory(event, sortMethod2); }
 			});
 		}
 	}

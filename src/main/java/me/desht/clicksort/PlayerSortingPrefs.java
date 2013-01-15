@@ -27,13 +27,13 @@ import me.desht.dhutils.LogUtils;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 
-public class PlayerSortingMethod {
+public class PlayerSortingPrefs {
 	private static final String SORT_PREFS_FILE = "sorting.yml";
 	private Map<String,SortPrefs> map = new HashMap<String, SortPrefs>();
 	private ClickSortPlugin plugin;
 	private boolean changed;
 	
-	public PlayerSortingMethod(ClickSortPlugin plugin) {
+	public PlayerSortingPrefs(ClickSortPlugin plugin) {
 		this.plugin = plugin;
 		this.changed = false;
 	}
