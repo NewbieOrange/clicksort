@@ -122,7 +122,7 @@ public class ItemNames {
 		map.put("50", "Torch");
 		map.put("51", "Fire");
 		map.put("52", "Mob Spawner");
-		map.put("53", "Wooden Stairs");
+		map.put("53", "Oak Wood Stairs");
 		map.put("54", "Chest");
 		map.put("55", "Redstone Wire");
 		map.put("56", "Diamond Ore");
@@ -136,7 +136,7 @@ public class ItemNames {
 		map.put("64", "Wood Door (Block)");
 		map.put("65", "Ladder");
 		map.put("66", "Rails");
-		map.put("67", "Cobblestone Stairs");
+		map.put("67", "Stone Stairs");
 		map.put("68", "Sign (Wall Block)");
 		map.put("69", "Lever");
 		map.put("70", "Stone Pressure Plate");
@@ -335,7 +335,7 @@ public class ItemNames {
 		map.put("357", "Cookie");
 		map.put("358", "Map");
 		map.put("359", "Shears");
-		map.put("360", "Melon (Slice)");
+		map.put("360", "Melon");
 		map.put("361", "Pumpkin Seeds");
 		map.put("362", "Melon Seeds");
 		map.put("363", "Raw Beef");
