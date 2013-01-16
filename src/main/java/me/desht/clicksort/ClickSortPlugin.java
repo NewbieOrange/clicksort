@@ -358,7 +358,6 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 		}
 		
 		while (res.size() < nItems) {
-			System.out.println("pad null!");
 			res.add(null);
 		}
 
