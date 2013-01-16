@@ -1,3 +1,4 @@
 doubleclick_speed_ms: 250
 autosave_seconds: 300
 log_level: INFO
+drop_excess: true

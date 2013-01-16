@@ -18,7 +18,9 @@ package me.desht.clicksort;
  */
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -230,10 +232,11 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 
 	@SuppressWarnings("deprecation")
 	private void sortInventory(final InventoryClickEvent event, final SortingMethod sortMethod) {
-		Inventory inv;
+		Player p = (Player)event.getWhoClicked();
 		int rawSlot = event.getRawSlot();
 		int slot = event.getView().convertSlot(rawSlot);
-
+		
+		Inventory inv;
 		if (slot == rawSlot) {
 			// upper inv was clicked
 			inv = event.getView().getTopInventory();
@@ -268,40 +271,57 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 		}
 
 		ItemStack[] items = inv.getContents();
-		ItemStack[] sortedItems = sortAndMerge(items, min, max, sortMethod);
+		List<ItemStack> sortedItems = sortAndMerge(items, min, max, sortMethod);
 
-		for (int i = 0; i < sortedItems.length; i++) {
-			ItemStack is = sortedItems[i];
+		int nItems = max - min;
+		
+		if (nItems < sortedItems.size() && !getConfig().getBoolean("drop_excess")) {
+			MiscUtil.errorMessage(p, "Inventory overflow detected!  Items not sorted.");
+			return;
+		}
+		
+		for (int i = 0; i < nItems && i < sortedItems.size(); i++) {
+			ItemStack is = sortedItems.get(i);
 			inv.setItem(min + i, is);
 		}
+		
+		if (nItems < sortedItems.size()) {
+			// This *shouldn't* happen, but there is a possibility if some other plugin has been messing
+			// with max stack sizes, and we end up with an overflowing inventory after merging stacks.
+			MiscUtil.alertMessage(p, "Some items couldn't fit and were dropped!");
+			for (int i = nItems; i < sortedItems.size(); i++) {
+				LogUtils.fine("dropping " + sortedItems.get(i) + " by player " + p.getName());
+				p.getWorld().dropItemNaturally(p.getLocation(), sortedItems.get(i));
+			}
+		}
 
-		Player p = (Player)event.getWhoClicked();
 		p.updateInventory();
 	}
 
-	private ItemStack[] sortAndMerge(ItemStack[] items, int min, int max, SortingMethod sortMethod) {
-		ItemStack[] res = new ItemStack[max - min];
+	private List<ItemStack> sortAndMerge(ItemStack[] items, int min, int max, SortingMethod sortMethod) {
+		List<ItemStack> res = new ArrayList<ItemStack>(max - min);
 		Map<String,Integer> amounts = new HashMap<String,Integer>();
 		Map<String,ItemMeta> metaMap = new HashMap<String,ItemMeta>();
 
 		// phase 1: extract a list of unique material/data/item-meta strings and use those as keys
 		// into a hash which maps items to quantities
-		LogUtils.fine("sortAndMerge: min = " + min + ", max = " + max + ", size = " + res.length);
-		for (int i = 0; i < res.length; i++) {
+		int nItems = max - min;
+		LogUtils.fine("sortAndMerge: min = " + min + ", max = " + max + ", size = " + nItems);
+		for (int i = 0; i < nItems; i++) {
 			ItemStack is = items[min + i];
-			String key;
 			if (is != null) {
 				ItemMeta meta = is.getItemMeta();
 				Map<String,Object> m = meta == null ? null : is.getItemMeta().serialize();
 				String metaStr = metaToString(m);
+				String key;
 				switch (sortMethod) {
 				case ID:
-					key = String.format("%03d:%05d:%s:%d", is.getTypeId(), is.getDurability(), metaStr, is.getTypeId());
+					key = String.format("%04d:%05d:%d:%s", is.getTypeId(), is.getDurability(), is.getTypeId(), metaStr);
 					break;
 				case NAME: 
 					String name = ItemNames.lookup(is);
 					if (name == null) name = is.getType().toString();
-					key = String.format("%s:%05d:%s:%d", name, is.getDurability(), metaStr, is.getTypeId());
+					key = String.format("%s:%05d:%d:%s", name, is.getDurability(), is.getTypeId(), metaStr);
 					break;
 				default:
 					throw new IllegalArgumentException("Unexpected value for sort method: " + sortMethod);	
@@ -318,23 +338,28 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 		}
 		
 		// phase 2: sort the extracted item keys and reconstruct the item stacks from those keys
-		int i = 0;
 		for (String str : MiscUtil.asSortedList(amounts.keySet())) {
 			int amount = amounts.get(str);
-			String[] fields = str.split(":");
-			Material mat = Material.getMaterial(Integer.parseInt(fields[3]));
+			LogUtils.finer("Process item [" + str + "], amount = " + amount);
+			String[] fields = str.split(":", 4);
+			Material mat = Material.getMaterial(Integer.parseInt(fields[2]));
 			short data = (short)Integer.parseInt(fields[1]);
 			int maxStack = mat.getMaxStackSize();
 			LogUtils.finer("max stack size for " + mat + " = " + maxStack);			
 			while (amount > maxStack) {
 				ItemStack is = new ItemStack(mat, maxStack, data);
-				is.setItemMeta(metaMap.get(fields[2]));
-				res[i++] = is;
+				is.setItemMeta(metaMap.get(fields[3]));
+				res.add(is);
 				amount -= maxStack;
 			}
 			ItemStack is = new ItemStack(mat, amount, data);
-			is.setItemMeta(metaMap.get(fields[2]));
-			res[i++] = is;
+			is.setItemMeta(metaMap.get(fields[3]));
+			res.add(is);
+		}
+		
+		while (res.size() < nItems) {
+			System.out.println("pad null!");
+			res.add(null);
 		}
 
 		return res;
