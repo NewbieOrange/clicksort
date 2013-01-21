@@ -26,6 +26,7 @@ import java.util.Map.Entry;
 
 import me.desht.clicksort.commands.ReloadCommand;
 import me.desht.dhutils.DHUtilsException;
+import me.desht.dhutils.ItemNames;
 import me.desht.dhutils.LogUtils;
 import me.desht.dhutils.MiscUtil;
 import me.desht.dhutils.PermissionUtils;
