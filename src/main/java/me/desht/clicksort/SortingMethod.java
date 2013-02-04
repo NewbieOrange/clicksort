@@ -18,7 +18,7 @@ along with ClickSort.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 public enum SortingMethod {
-	NONE, ID, NAME, GROUP, VALUE;
+	ID, NAME, GROUP, VALUE;
 	
 	public SortingMethod next() {
 		int o = (ordinal() + 1) % values().length;
