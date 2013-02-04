@@ -30,6 +30,7 @@ import me.desht.dhutils.ItemNames;
 import me.desht.dhutils.LogUtils;
 import me.desht.dhutils.MiscUtil;
 import me.desht.dhutils.PermissionUtils;
+import me.desht.dhutils.block.MaterialWithData;
 import me.desht.dhutils.commands.CommandManager;
 
 import org.bukkit.Bukkit;
@@ -57,6 +58,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 	private int doubleClickTime;
 	private PlayerSortingPrefs sorting;
 	private BukkitTask saveTask;
+	private ItemGrouping itemGroups;
 
 	@Override
 	public void onEnable() { 
@@ -73,6 +75,9 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 	
 		sorting = new PlayerSortingPrefs(this);
 		sorting.load();
+		
+		itemGroups = new ItemGrouping(this);
+		itemGroups.load();
 	
 		processConfig();
 	
@@ -313,21 +318,11 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 			if (is != null) {
 				ItemMeta meta = is.getItemMeta();
 				Map<String,Object> m = meta == null ? null : is.getItemMeta().serialize();
-				String metaStr = metaToString(m);
-				String key;
-				switch (sortMethod) {
-				case ID:
-					key = String.format("%04d:%05d:%d:%s", is.getTypeId(), is.getDurability(), is.getTypeId(), metaStr);
-					break;
-				case NAME: 
-					String name = ItemNames.lookup(is);
-					if (name == null) name = is.getType().toString();
-					key = String.format("%s:%05d:%d:%s", name, is.getDurability(), is.getTypeId(), metaStr);
-					break;
-				default:
-					throw new IllegalArgumentException("Unexpected value for sort method: " + sortMethod);	
-				}
-
+				String sortKey = makeSortKey(is, sortMethod);
+                String metaStr = metaToString(m);
+				String key = String.format("%s:%05d:%d:%s", sortKey, is.getDurability(), is.getTypeId(), metaStr);
+				
+				System.out.println("key = " + sortKey);
 				if (amounts.containsKey(key)) {
 					amounts.put(key, amounts.get(key) + is.getAmount());
 				} else {
@@ -365,7 +360,23 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 		return res;
 	}
 
-	private String metaToString(Map<String, Object> map) {
+	private String makeSortKey(ItemStack is, SortingMethod sortMethod) {
+        switch (sortMethod) {
+        case ID:
+        	return String.format("%04d", is.getTypeId());
+        case NAME:
+        	return ItemNames.lookup(is);
+        case GROUP:
+        	String grp = itemGroups.getGroup(MaterialWithData.get(is.getTypeId(), is.getDurability()));
+        	if (grp == null) {
+        		grp = getConfig().getBoolean("default_last") ? "99999" : "00000";
+        	}
+        	return String.format("%s-%04d", grp, is.getTypeId());
+        default: return "";
+        }
+    }
+
+    private String metaToString(Map<String, Object> map) {
 		if (map == null) return "";
 
 		StringBuilder sb = new StringBuilder();
