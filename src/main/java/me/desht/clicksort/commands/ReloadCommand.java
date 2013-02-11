@@ -34,8 +34,10 @@ public class ReloadCommand extends AbstractCommand {
 
 	@Override
 	public boolean execute(Plugin plugin, CommandSender sender, String[] args) {
-		plugin.reloadConfig();
-		((ClickSortPlugin) plugin).processConfig();
+		ClickSortPlugin csPlugin = (ClickSortPlugin) plugin;
+		csPlugin.reloadConfig();
+		csPlugin.processConfig();
+		csPlugin.getItemGrouping().load();
 		MiscUtil.statusMessage(sender, "ClickSort config has been reloaded");
 		
 		return true;

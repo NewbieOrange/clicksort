@@ -3,3 +3,4 @@ autosave_seconds: 300
 log_level: INFO
 drop_excess: true
 shift_click: true
+default_group_last: true

@@ -50,22 +50,35 @@ public class ItemGrouping {
 				int tmp = v1; v1 = v0; v0 = tmp;
 			}
 			for (int i = v0; i <= v1; i++) {
-				addMapping(MaterialWithData.get(i), matName, grpName);
+				addMapping(MaterialWithData.get(i), grpName);
 			}
 		} else {
-			addMapping(MaterialWithData.get(matName), matName, grpName);
+			addMapping(MaterialWithData.get(matName), grpName);
 		}
 	}
 	
-	private void addMapping(MaterialWithData mat, String matName, String grpName) {
+	private void addMapping(MaterialWithData mat, String grpName) {
+		LogUtils.finer("addMapping: " + mat + " = " + grpName);
 		if (mat == null || Material.getMaterial(mat.getId()) == null) {
 			throw new IllegalArgumentException();
 		}
-		mapping.put(mat.toString(), grpName);
+		mapping.put(getKey(mat), grpName);
 	}
 
 	public String getGroup(MaterialWithData mat) {
-		return mapping.get(mat.toString());
+		String group = mapping.get(mat.toString());
+		LogUtils.finer("getGroup: " + mat + " = " + group);
+		return group;
 	}
-
+	
+	private String getKey(MaterialWithData mat) {
+		// Items with durability should not use the current damage level as part of
+		// grouping criteria.  Items which don't have durability *should* use the data
+		// value, e.g. 351:4 is lapis which could be considered either a dye or a gem
+		return hasDurability(mat) ? Integer.toString(mat.getId()): mat.toString();
+	}
+	
+	private boolean hasDurability(MaterialWithData mat) {
+		return Material.getMaterial(mat.getId()).getMaxDurability() > 0;
+	}
 }

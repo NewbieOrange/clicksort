@@ -22,17 +22,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import me.desht.clicksort.commands.ChangeClickModeCommand;
 import me.desht.clicksort.commands.ChangeSortModeCommand;
 import me.desht.clicksort.commands.ReloadCommand;
 import me.desht.dhutils.DHUtilsException;
-import me.desht.dhutils.ItemNames;
 import me.desht.dhutils.LogUtils;
 import me.desht.dhutils.MiscUtil;
 import me.desht.dhutils.PermissionUtils;
-import me.desht.dhutils.block.MaterialWithData;
 import me.desht.dhutils.commands.CommandManager;
 
 import org.bukkit.Bukkit;
@@ -63,30 +60,34 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 	private BukkitTask saveTask;
 	private ItemGrouping itemGroups;
 
+	private static ClickSortPlugin instance = null;
+
 	@Override
 	public void onEnable() { 
 		LogUtils.init(this);
-	
+
 		PluginManager pm = this.getServer().getPluginManager();
 		pm.registerEvents(this, this);
-	
+
 		cmds.registerCommand(new ReloadCommand());
 		cmds.registerCommand(new ChangeClickModeCommand());
 		cmds.registerCommand(new ChangeSortModeCommand());
-		
+
 		this.getConfig().options().copyDefaults(true);
 		this.getConfig().options().header("See http://dev.bukkit.org/server-mods/clicksort/pages/configuration");
 		this.saveConfig();
-	
+
 		sorting = new PlayerSortingPrefs(this);
 		sorting.load();
-		
+
 		itemGroups = new ItemGrouping(this);
 		itemGroups.load();
-	
+
 		processConfig();
-	
+
 		setupMetrics();
+
+		instance = this;
 	}
 
 	@Override
@@ -96,6 +97,12 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 		if (saveTask != null) {
 			saveTask.cancel();
 		}
+
+		instance = null;
+	}
+
+	public static ClickSortPlugin getInstance() {
+		return instance;
 	}
 
 	/**
@@ -103,6 +110,10 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 	 */
 	public PlayerSortingPrefs getSortingPrefs() {
 		return sorting;
+	}
+
+	public ItemGrouping getItemGrouping() {
+		return itemGroups;
 	}
 
 	/**
@@ -121,7 +132,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 		String playerName = player.getName();
 
 		LogUtils.fine("inventory click by player " + playerName);
-		
+
 		SortingMethod sortMethod = sorting.getSortingMethod(playerName);
 		ClickMethod clickMethod = sorting.getClickMethod(playerName);
 
@@ -158,7 +169,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 		if (clickMethod == ClickMethod.NONE) return;
 
 		if (!event.isLeftClick()) return;
-		
+
 		if (clickMethod == ClickMethod.DOUBLE) {
 			long now = System.currentTimeMillis();
 			long last = lastClickTime.containsKey(playerName) ? lastClickTime.get(playerName) : 0L;
@@ -209,13 +220,13 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 		doubleClickTime = getConfig().getInt("doubleclick_speed_ms");
 
 		setupSaveTask();
-		
-		 String level = getConfig().getString("log_level");
-         try {
-                 LogUtils.setLogLevel(level);
-         } catch (IllegalArgumentException e) {
-                 LogUtils.warning("invalid log level " + level + " - ignored");
-         }
+
+		String level = getConfig().getString("log_level");
+		try {
+			LogUtils.setLogLevel(level);
+		} catch (IllegalArgumentException e) {
+			LogUtils.warning("invalid log level " + level + " - ignored");
+		}
 	}
 
 	private void setupMetrics() {
@@ -235,10 +246,10 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 			saveTask.cancel();
 			saveTask = null;
 		}
-		
+
 		int period = getConfig().getInt("autosave_seconds");
 		if (period <= 0) return;
-		
+
 		saveTask = getServer().getScheduler().runTaskTimer(this, new Runnable() {
 			@Override
 			public void run() { sorting.autosave(); }
@@ -250,7 +261,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 		Player p = (Player)event.getWhoClicked();
 		int rawSlot = event.getRawSlot();
 		int slot = event.getView().convertSlot(rawSlot);
-		
+
 		Inventory inv;
 		if (slot == rawSlot) {
 			// upper inv was clicked
@@ -289,17 +300,17 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 		List<ItemStack> sortedItems = sortAndMerge(items, min, max, sortMethod);
 
 		int nItems = max - min;
-		
+
 		if (nItems < sortedItems.size() && !getConfig().getBoolean("drop_excess")) {
 			MiscUtil.errorMessage(p, "Inventory overflow detected!  Items not sorted.");
 			return;
 		}
-		
+
 		for (int i = 0; i < nItems && i < sortedItems.size(); i++) {
 			ItemStack is = sortedItems.get(i);
 			inv.setItem(min + i, is);
 		}
-		
+
 		if (nItems < sortedItems.size()) {
 			// This *shouldn't* happen, but there is a possibility if some other plugin has been messing
 			// with max stack sizes, and we end up with an overflowing inventory after merging stacks.
@@ -319,7 +330,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 
 	private List<ItemStack> sortAndMerge(ItemStack[] items, int min, int max, SortingMethod sortMethod) {
 		List<ItemStack> res = new ArrayList<ItemStack>(max - min);
-		Map<String,Integer> amounts = new HashMap<String,Integer>();
+		Map<SortKey,Integer> amounts = new HashMap<SortKey,Integer>();
 		Map<String,ItemMeta> metaMap = new HashMap<String,ItemMeta>();
 
 		// phase 1: extract a list of unique material/data/item-meta strings and use those as keys
@@ -329,71 +340,35 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 		for (int i = 0; i < nItems; i++) {
 			ItemStack is = items[min + i];
 			if (is != null) {
-				ItemMeta meta = is.getItemMeta();
-				Map<String,Object> m = meta == null ? null : is.getItemMeta().serialize();
-				String sortKey = makeSortKey(is, sortMethod);
-                String metaStr = metaToString(m);
-				String key = String.format("%s:%05d:%d:%s", sortKey, is.getDurability(), is.getTypeId(), metaStr);
+				SortKey key = new SortKey(is, sortMethod);
 				if (amounts.containsKey(key)) {
 					amounts.put(key, amounts.get(key) + is.getAmount());
 				} else {
 					amounts.put(key, is.getAmount());
 				}
 
-				metaMap.put(metaStr, meta);
+				metaMap.put(key.getMetaStr(), is.getItemMeta());
 			}
 		}
-		
+
 		// phase 2: sort the extracted item keys and reconstruct the item stacks from those keys
-		for (String str : MiscUtil.asSortedList(amounts.keySet())) {
-			int amount = amounts.get(str);
-			LogUtils.finer("Process item [" + str + "], amount = " + amount);
-			String[] fields = str.split(":", 4);
-			Material mat = Material.getMaterial(Integer.parseInt(fields[2]));
-			short data = (short)Integer.parseInt(fields[1]);
+		for (SortKey sortKey : MiscUtil.asSortedList(amounts.keySet())) {
+			int amount = amounts.get(sortKey);
+			LogUtils.finer("Process item [" + sortKey + "], amount = " + amount);
+			Material mat = Material.getMaterial(sortKey.getMaterialID());
 			int maxStack = mat.getMaxStackSize();
 			LogUtils.finer("max stack size for " + mat + " = " + maxStack);			
 			while (amount > maxStack) {
-				ItemStack is = new ItemStack(mat, maxStack, data);
-				is.setItemMeta(metaMap.get(fields[3]));
-				res.add(is);
+				res.add(sortKey.toItemStack(maxStack));
 				amount -= maxStack;
 			}
-			ItemStack is = new ItemStack(mat, amount, data);
-			is.setItemMeta(metaMap.get(fields[3]));
-			res.add(is);
+			res.add(sortKey.toItemStack(amount));
 		}
-		
+
 		while (res.size() < nItems) {
 			res.add(null);
 		}
 
 		return res;
-	}
-
-	private String makeSortKey(ItemStack is, SortingMethod sortMethod) {
-        switch (sortMethod) {
-        case ID:
-        	return String.format("%04d", is.getTypeId());
-        case NAME:
-        	return ItemNames.lookup(is);
-        case GROUP:
-        	String grp = itemGroups.getGroup(MaterialWithData.get(is.getTypeId(), is.getDurability()));
-        	if (grp == null) {
-        		grp = getConfig().getBoolean("default_last") ? "99999" : "00000";
-        	}
-        	return String.format("%s-%04d", grp, is.getTypeId());
-        default: return "";
-        }
-    }
-
-    private String metaToString(Map<String, Object> map) {
-		if (map == null) return "";
-
-		StringBuilder sb = new StringBuilder();
-		for (Entry<String, Object> entry : map.entrySet()) {
-			sb.append(entry.getKey()).append("=").append(entry.getValue().toString()).append(";");
-		}
-		return sb.toString();
 	}
 }
