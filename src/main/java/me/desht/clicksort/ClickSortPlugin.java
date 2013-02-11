@@ -39,6 +39,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -309,7 +310,11 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 			}
 		}
 
-		p.updateInventory();
+		for (HumanEntity he : event.getViewers()) {
+			if (he instanceof Player) {
+				((Player)he).updateInventory();
+			}
+		}
 	}
 
 	private List<ItemStack> sortAndMerge(ItemStack[] items, int min, int max, SortingMethod sortMethod) {
