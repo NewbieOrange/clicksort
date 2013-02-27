@@ -59,16 +59,17 @@ public class ItemGrouping {
 	}
 	
 	private void addMapping(MaterialWithData mat, String grpName) {
-		LogUtils.finer("addMapping: " + mat + " = " + grpName);
 		if (mat == null || Material.getMaterial(mat.getId()) == null) {
 			throw new IllegalArgumentException();
 		}
+		String key = getKey(mat);
 		mapping.put(getKey(mat), grpName);
+		LogUtils.finer("addMapping: " + key + " = " + grpName);
 	}
 
 	public String getGroup(ItemStack stack) {
 		MaterialWithData mwd = MaterialWithData.get(stack.getTypeId(), stack.getDurability());
-		String group = mapping.get(mwd.toString());
+		String group = mapping.get(getKey(mwd));
 		if (group == null) {
     		group = plugin.getConfig().getString("default_group_name", "000-default");
     	}
