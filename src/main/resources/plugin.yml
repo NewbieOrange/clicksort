@@ -27,6 +27,9 @@ permissions:
   clicksort.commands.clickmode:
     description: Allow use of the /clicksort clickmode command
     default: true
+  clicksort.commands.shiftclick:
+    description: Allow use of the /clicksort shiftclick command
+    default: true
   clicksort.sort:
     description: Allow inventory to be click-sorted
     default: true
