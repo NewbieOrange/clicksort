@@ -11,6 +11,9 @@ commands:
     description: Manage the ClickSort plugin
     usage: |
       /<command> reload
+      /<command> sort <id|name|group|value>
+      /<command> click <single|double|none>
+      /<command> shiftclick
 
 permissions:
   clicksort.admin:
@@ -18,14 +21,17 @@ permissions:
     default: op
     children:
       clicksort.commands.reload: true
+      clicksort.commands.sort: true
+      clicksort.commands.click: true
+      clicksort.commands.shiftclick: true
   clicksort.commands.reload:
     description: Allow use of the /clicksort reload command
     default: op
-  clicksort.commands.sortmode:
-    description: Allow use of the /clicksort sortmode command
+  clicksort.commands.sort:
+    description: Allow use of the /clicksort sort command
     default: true
-  clicksort.commands.clickmode:
-    description: Allow use of the /clicksort clickmode command
+  clicksort.commands.click:
+    description: Allow use of the /clicksort click command
     default: true
   clicksort.commands.shiftclick:
     description: Allow use of the /clicksort shiftclick command
