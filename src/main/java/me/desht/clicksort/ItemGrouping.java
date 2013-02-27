@@ -11,6 +11,7 @@ import me.desht.dhutils.block.MaterialWithData;
 import org.bukkit.Material;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.inventory.ItemStack;
 
 public class ItemGrouping {
 	private static final String mapFile = "groups.yml";
@@ -65,10 +66,18 @@ public class ItemGrouping {
 		mapping.put(getKey(mat), grpName);
 	}
 
-	public String getGroup(MaterialWithData mat) {
-		String group = mapping.get(mat.toString());
-		LogUtils.finer("getGroup: " + mat + " = " + group);
+	public String getGroup(ItemStack stack) {
+		MaterialWithData mwd = MaterialWithData.get(stack.getTypeId(), stack.getDurability());
+		String group = mapping.get(mwd.toString());
+		if (group == null) {
+    		group = plugin.getConfig().getString("default_group_name", "000-default");
+    	}
+		LogUtils.finer("getGroup: " + mwd + " = " + group);
 		return group;
+	}
+	
+	public boolean isAvailable() {
+		return !mapping.isEmpty();
 	}
 	
 	private String getKey(MaterialWithData mat) {

@@ -3,9 +3,6 @@ package me.desht.clicksort;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import me.desht.dhutils.ItemNames;
-import me.desht.dhutils.block.MaterialWithData;
-
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -17,12 +14,11 @@ public class SortKey implements Comparable<SortKey> {
 	final ItemMeta meta;
 
 	public SortKey(ItemStack stack, SortingMethod sortMethod) {
-		this.sortPrefix = makeSortPrefix(stack, sortMethod);
+		this.sortPrefix = sortMethod.makeSortPrefix(stack);
 		this.materialID = stack.getTypeId();
 		this.durability = stack.getDurability();
 		this.meta = stack.getItemMeta();
-		Map<String,Object> m = meta == null ? null : stack.getItemMeta().serialize();
-		this.metaStr = metaToString(m);
+		this.metaStr = makeMetaString();
 	}
 	
 	/**
@@ -116,26 +112,9 @@ public class SortKey implements Comparable<SortKey> {
 		return true;
 	}
 	
-	private String makeSortPrefix(ItemStack is, SortingMethod sortMethod) {
-        switch (sortMethod) {
-        case ID:
-        	return String.format("%04d", is.getTypeId());
-        case NAME:
-        	return ItemNames.lookup(is);
-        case GROUP:
-        	ClickSortPlugin plugin = ClickSortPlugin.getInstance();
-        	ItemGrouping itemGroups = plugin.getItemGrouping();
-        	String grp = itemGroups.getGroup(MaterialWithData.get(is.getTypeId(), is.getDurability()));
-        	if (grp == null) {
-        		grp = plugin.getConfig().getBoolean("default_group_last") ? "99999" : "00000";
-        	}
-        	return String.format("%s-%04d", grp, is.getTypeId());
-        default: return "";
-        }
-    }
-	
-    private String metaToString(Map<String, Object> map) {
-		if (map == null) return "";
+    private String makeMetaString() {
+    	if (meta == null) return "";
+		Map<String, Object> map = meta.serialize();
 
 		StringBuilder sb = new StringBuilder();
 		for (Entry<String, Object> entry : map.entrySet()) {

@@ -2,5 +2,5 @@ doubleclick_speed_ms: 250
 autosave_seconds: 300
 log_level: INFO
 drop_excess: true
-shift_click: true
-default_group_last: true
+default_group_name: '000-default'
+use_essentials_worth: true

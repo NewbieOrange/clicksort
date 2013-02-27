@@ -9,8 +9,8 @@
 # http://jd.bukkit.org/rb/apidocs/org/bukkit/Material.html.  You can also
 # specify a data value if you want, e.g. '351:4' is a piece of a lapis.
 # 
-# See also the 'default_group_last' setting in config.yml for how to sort
-# items which aren't in any defined group.
+# See also the 'default_group_name' setting in config.yml for how to define
+# a default group for any items not listed here.
 #
 010-tools: [ 256-258, 269-271, 273-275, 277-279, 284-286, 290-294, 259, 346 ]
 020-weapons: [ 267, 268, 272, 276, 283, 261 ]

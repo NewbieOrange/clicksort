@@ -1,0 +1,21 @@
+#
+# ClickSort values.yml file; provide values for items for sorting by value.
+#
+# Format is:
+#   MATERIAL: VALUE
+# or
+#   MATERIAL/DATA: VALUE
+# 
+# where MATERIAL is a Bukkit Material name as listed in http://jd.bukkit.org/rb/apidocs/org/bukkit/Material.html
+# and DATA is a numeric data value
+#
+# Example:
+#   COBBLESTONE: 1.0
+#   IRON_BLOCK: 100.0
+#   DIAMOND_BLOCK: 2000.0
+# You can include data values with a "/" separator, e.g.:
+#   INK_SACK/0: 1.0
+#   INK_SACK/1: 2.0
+# 
+# You can use upper or lower-case material names.
+#

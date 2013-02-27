@@ -56,6 +56,15 @@ public class PlayerSortingPrefs {
 		changed = true;
 	}
 	
+	public boolean getShiftClickAllowed(String playerName) {
+		return getPrefs(playerName).shiftClick;
+	}
+	
+	public void setShiftClickAllowed(String playerName, boolean allow) {
+		getPrefs(playerName).shiftClick = allow;
+		changed = true;
+	}
+	
 	private SortPrefs getPrefs(String playerName) {
 		if (!map.containsKey(playerName)) map.put(playerName, new SortPrefs());
 		return map.get(playerName);
@@ -64,7 +73,7 @@ public class PlayerSortingPrefs {
 	public void load() {
 		YamlConfiguration conf = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), SORT_PREFS_FILE));
 		for (String k : conf.getKeys(false)) {
-			map.put(k, new SortPrefs(conf.getString(k + ".sort"), conf.getString(k + ".click")));
+			map.put(k, new SortPrefs(conf.getString(k + ".sort"), conf.getString(k + ".click"), conf.getBoolean(k + ".shiftClick", true)));
 		}
 		LogUtils.fine("loaded player sorting preferences (" + map.size() + " records)");
 	}
@@ -79,6 +88,7 @@ public class PlayerSortingPrefs {
 		for (Entry<String,SortPrefs> entry : map.entrySet()) {
 			conf.set(entry.getKey() + ".sort", entry.getValue().sortMethod.toString());
 			conf.set(entry.getKey() + ".click", entry.getValue().clickMethod.toString());
+			conf.set(entry.getKey() + ".shiftClick", entry.getValue().shiftClick);
 		}
 		
 		try {
@@ -93,13 +103,16 @@ public class PlayerSortingPrefs {
 	private class SortPrefs {
 		public SortingMethod sortMethod;
 		public ClickMethod clickMethod;
+		public boolean shiftClick;
 		public SortPrefs() {
 			sortMethod = SortingMethod.ID;
 			clickMethod = ClickMethod.DOUBLE;
+			shiftClick = true;
 		}
-		public SortPrefs(String sort, String click) {
+		public SortPrefs(String sort, String click, boolean shiftClick) {
 			sortMethod = SortingMethod.valueOf(sort);
 			clickMethod = ClickMethod.valueOf(click);
+			this.shiftClick = shiftClick;
 		}
 	}
 }

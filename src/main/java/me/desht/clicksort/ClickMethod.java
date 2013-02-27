@@ -7,4 +7,12 @@ public enum ClickMethod {
 		int o = (ordinal() + 1) % values().length;
 		return values()[o];
 	}
+	
+	public String getInstruction() {
+		switch (this) {
+		case SINGLE: return "Single-click an empty inventory slot to sort.";
+		case DOUBLE: return "Double-click to sort.";
+		default: return "Click-sorting has been disabled.";
+		}
+	}
 }

@@ -4,6 +4,7 @@ author: desht
 version: ${project.version}
 description: Super-convenient inventory sorting
 website: http://dev.bukkit.org/server-mods/clicksort
+softdepend: [ Essentials ]
 
 commands:
   clicksort:
@@ -20,6 +21,12 @@ permissions:
   clicksort.commands.reload:
     description: Allow use of the /clicksort reload command
     default: op
+  clicksort.commands.sortmode:
+    description: Allow use of the /clicksort sortmode command
+    default: true
+  clicksort.commands.clickmode:
+    description: Allow use of the /clicksort clickmode command
+    default: true
   clicksort.sort:
     description: Allow inventory to be click-sorted
     default: true

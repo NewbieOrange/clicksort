@@ -26,6 +26,7 @@ import java.util.Map;
 import me.desht.clicksort.commands.ChangeClickModeCommand;
 import me.desht.clicksort.commands.ChangeSortModeCommand;
 import me.desht.clicksort.commands.ReloadCommand;
+import me.desht.clicksort.commands.ShiftClickCommand;
 import me.desht.dhutils.DHUtilsException;
 import me.desht.dhutils.LogUtils;
 import me.desht.dhutils.MiscUtil;
@@ -56,9 +57,10 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 	private final Map<String, Integer> lastClickSlot = new HashMap<String, Integer>();
 	private final CommandManager cmds = new CommandManager(this);
 	private int doubleClickTime;
-	private PlayerSortingPrefs sorting;
+	private PlayerSortingPrefs sortingPrefs;
 	private BukkitTask saveTask;
 	private ItemGrouping itemGroups;
+	private ItemValues itemValues;
 
 	private static ClickSortPlugin instance = null;
 
@@ -72,16 +74,19 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 		cmds.registerCommand(new ReloadCommand());
 		cmds.registerCommand(new ChangeClickModeCommand());
 		cmds.registerCommand(new ChangeSortModeCommand());
+		cmds.registerCommand(new ShiftClickCommand());
 
 		this.getConfig().options().copyDefaults(true);
 		this.getConfig().options().header("See http://dev.bukkit.org/server-mods/clicksort/pages/configuration");
 		this.saveConfig();
 
-		sorting = new PlayerSortingPrefs(this);
-		sorting.load();
+		sortingPrefs = new PlayerSortingPrefs(this);
+		sortingPrefs.load();
 
 		itemGroups = new ItemGrouping(this);
 		itemGroups.load();
+		itemValues = new ItemValues(this);
+		itemValues.load();
 
 		processConfig();
 
@@ -93,7 +98,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 	@Override
 	public void onDisable() {
 		saveConfig();
-		sorting.save();
+		sortingPrefs.save();
 		if (saveTask != null) {
 			saveTask.cancel();
 		}
@@ -109,11 +114,15 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 	 * @return the sorting
 	 */
 	public PlayerSortingPrefs getSortingPrefs() {
-		return sorting;
+		return sortingPrefs;
 	}
 
 	public ItemGrouping getItemGrouping() {
 		return itemGroups;
+	}
+
+	public ItemValues getItemValues() {
+		return itemValues;
 	}
 
 	/**
@@ -133,36 +142,29 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 
 		LogUtils.fine("inventory click by player " + playerName);
 
-		SortingMethod sortMethod = sorting.getSortingMethod(playerName);
-		ClickMethod clickMethod = sorting.getClickMethod(playerName);
-
-		if (event.getCurrentItem().getType() == Material.AIR &&	event.isShiftClick() && getConfig().getBoolean("shift_click")) {
+		SortingMethod sortMethod = sortingPrefs.getSortingMethod(playerName);
+		ClickMethod clickMethod = sortingPrefs.getClickMethod(playerName);
+		boolean allowShiftClick = sortingPrefs.getShiftClickAllowed(playerName);
+		
+		if (event.getCurrentItem().getType() == Material.AIR &&	event.isShiftClick() && allowShiftClick) {
 			if (event.isLeftClick() && clickMethod != ClickMethod.NONE) {
 				// shift-left-clicking an empty slot cycles sort method for the player
-				sortMethod = sortMethod.next();
-				sorting.setSortingMethod(playerName, sortMethod);
-				String s = clickMethod == ClickMethod.DOUBLE ? "Double-click" : "Single-click an empty inventory slot";
-				MiscUtil.statusMessage(player, "Sort by " + sortMethod.toString() + ".  " + s + " to sort.");
+				do {
+					sortMethod = sortMethod.next();	
+				} while (!sortMethod.isAvailable());
+				sortingPrefs.setSortingMethod(playerName, sortMethod);
+				MiscUtil.statusMessage(player, "Sort by " + sortMethod.toString() + ".  " + clickMethod.getInstruction());
 				MiscUtil.statusMessage(player, "Shift-Left-click any empty inventory slot to change.");
 			} else if (event.isRightClick()) {
 				// shift-right-clicking an empty slot cycles click method for the player
 				clickMethod = clickMethod.next();
-				sorting.setClickMethod(playerName, clickMethod);
-				switch (clickMethod) {
-				case SINGLE:
-					MiscUtil.statusMessage(player, "Single-click mode: single-click an empty inventory slot to sort.");
-					break;
-				case DOUBLE:
-					MiscUtil.statusMessage(player, "Double-click mode: double-click any inventory slot to sort.");
-					break;
-				case NONE:
-					MiscUtil.statusMessage(player, "Click-sorting has been disabled.");
-					break;
-				}
+				sortingPrefs.setClickMethod(playerName, clickMethod);
+				MiscUtil.statusMessage(player, clickMethod.getInstruction());
 				MiscUtil.statusMessage(player, "Shift-Right-click any empty inventory slot to change.");
 			}
-			if (getConfig().getInt("autosave_seconds") == 0)
-				sorting.save();
+			if (getConfig().getInt("autosave_seconds") == 0) {
+				sortingPrefs.save();
+			}
 			return;
 		}
 
@@ -179,6 +181,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 				// second click was quick enough - remove the record of the last click and
 				// proceed with sorting
 				lastClickTime.remove(playerName);
+				lastClickSlot.remove(playerName);
 
 				// the actual sorting is deferred till the end of the tick
 				// this is to allow any item on the cursor to be placed back in the 
@@ -205,7 +208,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 			});
 		}
 	}
-
+	
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		try {
@@ -252,7 +255,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 
 		saveTask = getServer().getScheduler().runTaskTimer(this, new Runnable() {
 			@Override
-			public void run() { sorting.autosave(); }
+			public void run() { sortingPrefs.autosave(); }
 		}, 0L, 20L * period);
 	}
 

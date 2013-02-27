@@ -93,6 +93,7 @@
                     <include>plugin.yml</include>
                     <include>config.yml</include>
                     <include>groups.yml</include>
+                    <include>values.yml</include>
                 </includes>
             </resource>
         </resources>

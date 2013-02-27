@@ -38,6 +38,7 @@ public class ReloadCommand extends AbstractCommand {
 		csPlugin.reloadConfig();
 		csPlugin.processConfig();
 		csPlugin.getItemGrouping().load();
+		csPlugin.getItemValues().load();
 		MiscUtil.statusMessage(sender, "ClickSort config has been reloaded");
 		
 		return true;
