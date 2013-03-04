@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import me.desht.clicksort.commands.ChangeClickModeCommand;
 import me.desht.clicksort.commands.ChangeSortModeCommand;
@@ -33,6 +34,7 @@ import me.desht.dhutils.MiscUtil;
 import me.desht.dhutils.PermissionUtils;
 import me.desht.dhutils.commands.CommandManager;
 
+import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -334,7 +336,6 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 	private List<ItemStack> sortAndMerge(ItemStack[] items, int min, int max, SortingMethod sortMethod) {
 		List<ItemStack> res = new ArrayList<ItemStack>(max - min);
 		Map<SortKey,Integer> amounts = new HashMap<SortKey,Integer>();
-		Map<String,ItemMeta> metaMap = new HashMap<String,ItemMeta>();
 
 		// phase 1: extract a list of unique material/data/item-meta strings and use those as keys
 		// into a hash which maps items to quantities
@@ -349,10 +350,11 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 				} else {
 					amounts.put(key, is.getAmount());
 				}
-
-				metaMap.put(key.getMetaStr(), is.getItemMeta());
 			}
 		}
+		
+		// Sanity check
+		checkNoNulls(amounts, items);
 
 		// phase 2: sort the extracted item keys and reconstruct the item stacks from those keys
 		for (SortKey sortKey : MiscUtil.asSortedList(amounts.keySet())) {
@@ -373,5 +375,17 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 		}
 
 		return res;
+	}
+
+	private void checkNoNulls(Map<SortKey, Integer> amounts, ItemStack[] items) {
+		for (SortKey key : amounts.keySet()) {
+			if (key == null) {
+				LogUtils.severe("Detected null sort key!  Inventory dump follows:");
+				for (ItemStack item: items) {
+					LogUtils.severe(item.toString());
+				}
+				LogUtils.severe("Please report this, quoting all above error text, in a ticket at http://dev.bukkit.org/server-mods/clicksort/tickets/");
+			}
+		}
 	}
 }
