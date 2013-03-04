@@ -7,11 +7,11 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 public class SortKey implements Comparable<SortKey> {
-	final String sortPrefix;
-	final int materialID;
-	final short durability;
-	final String metaStr;
-	final ItemMeta meta;
+	private final String sortPrefix;
+	private final int materialID;
+	private final short durability;
+	private final String metaStr;
+	private final ItemMeta meta;
 
 	public SortKey(ItemStack stack, SortingMethod sortMethod) {
 		this.sortPrefix = sortMethod.makeSortPrefix(stack);
@@ -57,6 +57,8 @@ public class SortKey implements Comparable<SortKey> {
 	
 	@Override
 	public int compareTo(SortKey other) {
+		if (other == null) return 1;
+		
 		int c = this.getSortPrefix().compareTo(other.getSortPrefix());
 		if (c != 0) return c;
 		
