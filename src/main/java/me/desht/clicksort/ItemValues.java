@@ -61,7 +61,7 @@ public class ItemValues {
 			valueMap.set(key.toLowerCase(), cfg.getDouble(key));
 		}
 		
-		available = !essMap.getKeys(false).isEmpty() || !valueMap.getKeys(false).isEmpty();
+		available = (essMap != null && !essMap.getKeys(false).isEmpty()) || !valueMap.getKeys(false).isEmpty();
 	}
 	
 	/**
