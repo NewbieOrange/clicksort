@@ -2,12 +2,12 @@ package me.desht.clicksort;
 
 public enum ClickMethod {
 	DOUBLE, SINGLE, NONE;
-	
+
 	public ClickMethod next() {
 		int o = (ordinal() + 1) % values().length;
 		return values()[o];
 	}
-	
+
 	public String getInstruction() {
 		switch (this) {
 		case SINGLE: return "Single-click an empty inventory slot to sort.";

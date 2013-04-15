@@ -16,16 +16,16 @@ import me.desht.dhutils.LogUtils;
 
 public class ItemValues {
 	public static final String mapFile = "values.yml";
-	
+
 	private final ClickSortPlugin plugin;
 	private File essWorthFile;
 	private ConfigurationSection essMap;
 	private Configuration valueMap;
 	private boolean available;
-	
+
 	public ItemValues(ClickSortPlugin plugin) {
 		this.plugin = plugin;
-		
+
 		// see if Essentials is installed and there's a usable worth.yml file
 		PluginManager pm = plugin.getServer().getPluginManager();
 		Plugin ess = pm.getPlugin("Essentials");
@@ -33,13 +33,13 @@ public class ItemValues {
 			essWorthFile = new File(ess.getDataFolder(), "worth.yml");
 			if (!essWorthFile.exists()) essWorthFile = null;
 		}
-		
+
 		// extract our own (blank-by-default) values.yml file
 		new JARUtil(plugin).extractResource(mapFile, plugin.getDataFolder());
-		
+
 		available = false;
 	}
-	
+
 	public void load() {
 		essMap = null;
 		if (essWorthFile != null && plugin.getConfig().getBoolean("use_essentials_worth")) {
@@ -52,7 +52,7 @@ public class ItemValues {
 				LogUtils.fine("loaded Essentials worth.yml file");
 			}
 		}
-		
+
 		// load our own values.yml file
 		File f = new File(plugin.getDataFolder(), mapFile);
 		YamlConfiguration cfg = YamlConfiguration.loadConfiguration(f);
@@ -60,21 +60,21 @@ public class ItemValues {
 		for (String key : cfg.getKeys(false)) {
 			valueMap.set(key.toLowerCase(), cfg.getDouble(key));
 		}
-		
+
 		available = (essMap != null && !essMap.getKeys(false).isEmpty()) || !valueMap.getKeys(false).isEmpty();
 	}
-	
+
 	/**
-	 * Given a material, 
-	 * 
+	 * Given a material,
+	 *
 	 * @param mwd
 	 * @return
 	 */
 	public double getValue(ItemStack stack) {
 		double val = 0.0;
-		
+
 		Material mat = Material.getMaterial(stack.getTypeId());
-		
+
 		// check possible worth.yml from Essentials first
 		if (essMap != null) {
 			String s = mat.toString().replace("_", "").toLowerCase();
@@ -92,10 +92,10 @@ public class ItemValues {
 			String s = matName + "/" + stack.getDurability();
 			val = valueMap.getDouble(s, val);
 		}
-		
+
 		return val;
 	}
-	
+
 	public boolean isAvailable() {
 		return available;
 	}

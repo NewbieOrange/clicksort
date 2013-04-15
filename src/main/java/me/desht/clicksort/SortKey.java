@@ -20,7 +20,7 @@ public class SortKey implements Comparable<SortKey> {
 		this.meta = stack.getItemMeta();
 		this.metaStr = makeMetaString();
 	}
-	
+
 	/**
 	 * @return the sortPrefix
 	 */
@@ -54,20 +54,20 @@ public class SortKey implements Comparable<SortKey> {
 		stack.setItemMeta(meta);
 		return stack;
 	}
-	
+
 	@Override
 	public int compareTo(SortKey other) {
 		if (other == null) return 1;
-		
+
 		int c = this.getSortPrefix().compareTo(other.getSortPrefix());
 		if (c != 0) return c;
-		
+
 		c = this.getMaterialID() - other.getMaterialID();
 		if (c != 0) return c;
-		
+
 		c = this.getDurability() - other.getDurability();
 		if (c != 0) return c;
-		
+
 		return this.getMetaStr().compareTo(other.getMetaStr());
 	}
 
@@ -113,7 +113,7 @@ public class SortKey implements Comparable<SortKey> {
 			return false;
 		return true;
 	}
-	
+
     private String makeMetaString() {
     	if (meta == null) return "";
 		Map<String, Object> map = meta.serialize();
@@ -124,7 +124,7 @@ public class SortKey implements Comparable<SortKey> {
 		}
 		return sb.toString();
 	}
-    
+
     @Override
     public String toString() {
     	return String.format("SortKey[%s|%d|%d|%s]", getSortPrefix(), getMaterialID(), getDurability(), getMetaStr());

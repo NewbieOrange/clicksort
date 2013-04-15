@@ -41,7 +41,7 @@ public class ItemGrouping {
 			}
 		}
 	}
-	
+
 	private void addMapping(String matName, String grpName) {
 		if (matName.matches("^\\d+-\\d+$")) {
 			String[] fields = matName.split("-");
@@ -57,7 +57,7 @@ public class ItemGrouping {
 			addMapping(MaterialWithData.get(matName), grpName);
 		}
 	}
-	
+
 	private void addMapping(MaterialWithData mat, String grpName) {
 		if (mat == null || Material.getMaterial(mat.getId()) == null) {
 			throw new IllegalArgumentException();
@@ -76,18 +76,18 @@ public class ItemGrouping {
 		LogUtils.finer("getGroup: " + mwd + " = " + group);
 		return group;
 	}
-	
+
 	public boolean isAvailable() {
 		return !mapping.isEmpty();
 	}
-	
+
 	private String getKey(MaterialWithData mat) {
 		// Items with durability should not use the current damage level as part of
 		// grouping criteria.  Items which don't have durability *should* use the data
 		// value, e.g. 351:4 is lapis which could be considered either a dye or a gem
 		return hasDurability(mat) ? Integer.toString(mat.getId()): mat.toString();
 	}
-	
+
 	private boolean hasDurability(MaterialWithData mat) {
 		return Material.getMaterial(mat.getId()).getMaxDurability() > 0;
 	}

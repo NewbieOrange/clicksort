@@ -1,5 +1,8 @@
 package me.desht.clicksort.commands;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import me.desht.clicksort.ClickMethod;
 import me.desht.clicksort.ClickSortPlugin;
 import me.desht.clicksort.PlayerSortingPrefs;
@@ -20,7 +23,7 @@ public class ChangeClickModeCommand extends AbstractCommand {
 	@Override
 	public boolean execute(Plugin plugin, CommandSender sender, String[] args) {
 		notFromConsole(sender);
-		
+
 		try {
 			PlayerSortingPrefs prefs = ((ClickSortPlugin) plugin).getSortingPrefs();
 			ClickMethod clickMethod = ClickMethod.valueOf(args[0].toUpperCase());
@@ -29,8 +32,16 @@ public class ChangeClickModeCommand extends AbstractCommand {
 		} catch (IllegalArgumentException e) {
 			showUsage(sender);
 		}
-		
+
 		return true;
 	}
 
+	@Override
+	public List<String> onTabComplete(Plugin plugin, CommandSender sender, String[] args) {
+		if (args.length == 1) {
+			return getEnumCompletions(sender, ClickMethod.class, args[0]);
+		} else {
+			return noCompletions(sender);
+		}
+	}
 }

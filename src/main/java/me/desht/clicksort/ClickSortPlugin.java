@@ -67,7 +67,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 	private static ClickSortPlugin instance = null;
 
 	@Override
-	public void onEnable() { 
+	public void onEnable() {
 		LogUtils.init(this);
 
 		PluginManager pm = this.getServer().getPluginManager();
@@ -130,7 +130,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 	/**
 	 * Inventory click handler.  Run with priority HIGHEST - this makes it run late, giving protection
 	 * plugins a chance to cancel the inventory click event first.
-	 * 
+	 *
 	 * @param event
 	 */
 	@EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
@@ -147,12 +147,12 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 		SortingMethod sortMethod = sortingPrefs.getSortingMethod(playerName);
 		ClickMethod clickMethod = sortingPrefs.getClickMethod(playerName);
 		boolean allowShiftClick = sortingPrefs.getShiftClickAllowed(playerName);
-		
+
 		if (event.getCurrentItem().getType() == Material.AIR &&	event.isShiftClick() && allowShiftClick) {
 			if (event.isLeftClick() && clickMethod != ClickMethod.NONE) {
 				// shift-left-clicking an empty slot cycles sort method for the player
 				do {
-					sortMethod = sortMethod.next();	
+					sortMethod = sortMethod.next();
 				} while (!sortMethod.isAvailable());
 				sortingPrefs.setSortingMethod(playerName, sortMethod);
 				MiscUtil.statusMessage(player, "Sort by " + sortMethod.toString() + ".  " + clickMethod.getInstruction());
@@ -186,7 +186,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 				lastClickSlot.remove(playerName);
 
 				// the actual sorting is deferred till the end of the tick
-				// this is to allow any item on the cursor to be placed back in the 
+				// this is to allow any item on the cursor to be placed back in the
 				// inventory *before* the sorting is done
 				final SortingMethod sortMethod2 = sortMethod;
 				Bukkit.getScheduler().runTask(this, new Runnable() {
@@ -210,7 +210,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 			});
 		}
 	}
-	
+
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		try {
@@ -219,6 +219,11 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 			MiscUtil.errorMessage(sender, e.getMessage());
 			return true;
 		}
+	}
+
+	@Override
+	public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
+		return cmds.onTabComplete(sender, command, label, args);
 	}
 
 	public void processConfig() {
@@ -352,7 +357,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 				}
 			}
 		}
-		
+
 		// Sanity check
 		checkNoNulls(amounts, items);
 
@@ -362,7 +367,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 			LogUtils.finer("Process item [" + sortKey + "], amount = " + amount);
 			Material mat = Material.getMaterial(sortKey.getMaterialID());
 			int maxStack = mat.getMaxStackSize();
-			LogUtils.finer("max stack size for " + mat + " = " + maxStack);			
+			LogUtils.finer("max stack size for " + mat + " = " + maxStack);
 			while (amount > maxStack) {
 				res.add(sortKey.toItemStack(maxStack));
 				amount -= maxStack;

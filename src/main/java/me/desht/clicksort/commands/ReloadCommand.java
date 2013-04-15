@@ -15,7 +15,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with ClickSort.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
@@ -27,7 +27,7 @@ import me.desht.dhutils.commands.AbstractCommand;
 public class ReloadCommand extends AbstractCommand {
 
 	public ReloadCommand() {
-		super("clicksort r", 0, 0);
+		super("clicksort reload", 0, 0);
 		setPermissionNode("clicksort.commands.reload");
 		setUsage("/clicksort reload");
 	}
@@ -40,7 +40,7 @@ public class ReloadCommand extends AbstractCommand {
 		csPlugin.getItemGrouping().load();
 		csPlugin.getItemValues().load();
 		MiscUtil.statusMessage(sender, "ClickSort config has been reloaded");
-		
+
 		return true;
 	}
 

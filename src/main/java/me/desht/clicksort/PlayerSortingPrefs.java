@@ -32,44 +32,44 @@ public class PlayerSortingPrefs {
 	private Map<String,SortPrefs> map = new HashMap<String, SortPrefs>();
 	private ClickSortPlugin plugin;
 	private boolean changed;
-	
+
 	public PlayerSortingPrefs(ClickSortPlugin plugin) {
 		this.plugin = plugin;
 		this.changed = false;
 	}
-	
+
 	public SortingMethod getSortingMethod(String playerName) {
 		return getPrefs(playerName).sortMethod;
 	}
-	
+
 	public ClickMethod getClickMethod(String playerName) {
 		return getPrefs(playerName).clickMethod;
 	}
-	
+
 	public void setSortingMethod(String playerName, SortingMethod sortMethod) {
 		getPrefs(playerName).sortMethod = sortMethod;
 		changed = true;
 	}
-	
+
 	public void setClickMethod(String playerName, ClickMethod clickMethod) {
 		getPrefs(playerName).clickMethod = clickMethod;
 		changed = true;
 	}
-	
+
 	public boolean getShiftClickAllowed(String playerName) {
 		return getPrefs(playerName).shiftClick;
 	}
-	
+
 	public void setShiftClickAllowed(String playerName, boolean allow) {
 		getPrefs(playerName).shiftClick = allow;
 		changed = true;
 	}
-	
+
 	private SortPrefs getPrefs(String playerName) {
 		if (!map.containsKey(playerName)) map.put(playerName, new SortPrefs());
 		return map.get(playerName);
 	}
-	
+
 	public void load() {
 		YamlConfiguration conf = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), SORT_PREFS_FILE));
 		for (String k : conf.getKeys(false)) {
@@ -77,20 +77,20 @@ public class PlayerSortingPrefs {
 		}
 		LogUtils.fine("loaded player sorting preferences (" + map.size() + " records)");
 	}
-	
+
 	public void autosave() {
 		if (changed) save();
 	}
-	
+
 	public void save() {
 		YamlConfiguration conf = new YamlConfiguration();
-		
+
 		for (Entry<String,SortPrefs> entry : map.entrySet()) {
 			conf.set(entry.getKey() + ".sort", entry.getValue().sortMethod.toString());
 			conf.set(entry.getKey() + ".click", entry.getValue().clickMethod.toString());
 			conf.set(entry.getKey() + ".shiftClick", entry.getValue().shiftClick);
 		}
-		
+
 		try {
 			conf.save(new File(plugin.getDataFolder(), SORT_PREFS_FILE));
 		} catch (IOException e) {
@@ -99,7 +99,7 @@ public class PlayerSortingPrefs {
 		LogUtils.fine("saved player sorting preferences (" + map.size() + " records)");
 		changed = false;
 	}
-	
+
 	private class SortPrefs {
 		public SortingMethod sortMethod;
 		public ClickMethod clickMethod;

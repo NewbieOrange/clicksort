@@ -11,7 +11,7 @@ import org.bukkit.plugin.Plugin;
 public class ShiftClickCommand extends AbstractCommand {
 
 	public ShiftClickCommand() {
-		super("clicksort shift", 0, 0);
+		super("clicksort shiftclick", 0, 0);
 		setPermissionNode("clicksort.commands.shiftclick");
 		setUsage("/clicksort shiftclick");
 	}
@@ -19,7 +19,7 @@ public class ShiftClickCommand extends AbstractCommand {
 	@Override
 	public boolean execute(Plugin plugin, CommandSender sender, String[] args) {
 		notFromConsole(sender);
-		
+
 		try {
 			PlayerSortingPrefs prefs = ((ClickSortPlugin) plugin).getSortingPrefs();
 			boolean shiftClick = prefs.getShiftClickAllowed(sender.getName());
@@ -35,7 +35,7 @@ public class ShiftClickCommand extends AbstractCommand {
 		} catch (IllegalArgumentException e) {
 			showUsage(sender);
 		}
-		
+
 		return true;
 	}
 

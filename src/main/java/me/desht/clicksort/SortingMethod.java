@@ -23,12 +23,12 @@ along with ClickSort.  If not, see <http://www.gnu.org/licenses/>.
 
 public enum SortingMethod {
 	ID, NAME, GROUP, VALUE;
-	
+
 	public SortingMethod next() {
 		int o = (ordinal() + 1) % values().length;
 		return values()[o];
 	}
-	
+
 	public boolean isAvailable() {
 		switch (this) {
 		case GROUP: return ClickSortPlugin.getInstance().getItemGrouping().isAvailable();
@@ -36,7 +36,7 @@ public enum SortingMethod {
 		default: return true;
 		}
 	}
-	
+
 	public String makeSortPrefix(ItemStack stack) {
 		ClickSortPlugin plugin;
         switch (this) {
