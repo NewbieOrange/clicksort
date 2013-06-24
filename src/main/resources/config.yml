@@ -4,3 +4,7 @@ log_level: INFO
 drop_excess: true
 default_group_name: '000-default'
 use_essentials_worth: true
+defaults:
+  click_mode: DOUBLE
+  sort_mode: ID
+  shift_click: true
