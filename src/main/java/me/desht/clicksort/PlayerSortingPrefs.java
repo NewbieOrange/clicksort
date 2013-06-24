@@ -31,11 +31,11 @@ public class PlayerSortingPrefs {
 	private static final String SORT_PREFS_FILE = "sorting.yml";
 	private Map<String,SortPrefs> map = new HashMap<String, SortPrefs>();
 	private ClickSortPlugin plugin;
-	private boolean changed;
+	private boolean saveNeeded;
 
 	public PlayerSortingPrefs(ClickSortPlugin plugin) {
 		this.plugin = plugin;
-		this.changed = false;
+		this.saveNeeded = false;
 	}
 
 	public SortingMethod getSortingMethod(String playerName) {
@@ -48,12 +48,12 @@ public class PlayerSortingPrefs {
 
 	public void setSortingMethod(String playerName, SortingMethod sortMethod) {
 		getPrefs(playerName).sortMethod = sortMethod;
-		changed = true;
+		saveNeeded = true;
 	}
 
 	public void setClickMethod(String playerName, ClickMethod clickMethod) {
 		getPrefs(playerName).clickMethod = clickMethod;
-		changed = true;
+		saveNeeded = true;
 	}
 
 	public boolean getShiftClickAllowed(String playerName) {
@@ -62,12 +62,18 @@ public class PlayerSortingPrefs {
 
 	public void setShiftClickAllowed(String playerName, boolean allow) {
 		getPrefs(playerName).shiftClick = allow;
-		changed = true;
+		saveNeeded = true;
 	}
 
 	private SortPrefs getPrefs(String playerName) {
-		if (!map.containsKey(playerName)) map.put(playerName, new SortPrefs());
-		return map.get(playerName);
+		SortPrefs prefs = map.get(playerName);
+		if (prefs == null) {
+			prefs = new SortPrefs();
+			LogUtils.fine("initialise new sorting preferences for " + playerName + ": " + prefs);
+			map.put(playerName, prefs);
+			save();
+		}
+		return prefs;
 	}
 
 	public void load() {
@@ -79,7 +85,9 @@ public class PlayerSortingPrefs {
 	}
 
 	public void autosave() {
-		if (changed) save();
+		if (saveNeeded) {
+			save();
+		}
 	}
 
 	public void save() {
@@ -97,22 +105,39 @@ public class PlayerSortingPrefs {
 			LogUtils.severe("can't save " + SORT_PREFS_FILE + ": " + e.getMessage());
 		}
 		LogUtils.fine("saved player sorting preferences (" + map.size() + " records)");
-		changed = false;
+		saveNeeded = false;
 	}
 
 	private class SortPrefs {
 		public SortingMethod sortMethod;
 		public ClickMethod clickMethod;
 		public boolean shiftClick;
+
 		public SortPrefs() {
-			sortMethod = SortingMethod.ID;
-			clickMethod = ClickMethod.DOUBLE;
-			shiftClick = true;
+			try {
+				sortMethod = SortingMethod.valueOf(plugin.getConfig().getString("defaults.sort_mode"));
+			} catch (IllegalArgumentException e) {
+				LogUtils.warning("invalid sort method " + plugin.getConfig().getString("defaults.sort_mode") + " - default to ID");
+				sortMethod = SortingMethod.ID;
+			}
+			try {
+				clickMethod = ClickMethod.valueOf(plugin.getConfig().getString("defaults.click_mode"));
+			} catch (IllegalArgumentException e) {
+				LogUtils.warning("invalid click method " + plugin.getConfig().getString("defaults.click_mode") + " - default to DOUBLE");
+				clickMethod = ClickMethod.DOUBLE;
+			}
+			shiftClick = plugin.getConfig().getBoolean("defaults.shift_click");
 		}
+
 		public SortPrefs(String sort, String click, boolean shiftClick) {
 			sortMethod = SortingMethod.valueOf(sort);
 			clickMethod = ClickMethod.valueOf(click);
 			this.shiftClick = shiftClick;
+		}
+
+		@Override
+		public String toString() {
+			return "SortPrefs [sort=" + sortMethod + " click=" + clickMethod + " shiftclick=" + shiftClick + "]";
 		}
 	}
 }
