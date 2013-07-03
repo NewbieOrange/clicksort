@@ -123,8 +123,8 @@ public class PlayerSortingPrefs {
 			try {
 				clickMethod = ClickMethod.valueOf(plugin.getConfig().getString("defaults.click_mode"));
 			} catch (IllegalArgumentException e) {
-				LogUtils.warning("invalid click method " + plugin.getConfig().getString("defaults.click_mode") + " - default to DOUBLE");
-				clickMethod = ClickMethod.DOUBLE;
+				LogUtils.warning("invalid click method " + plugin.getConfig().getString("defaults.click_mode") + " - default to MIDDLE");
+				clickMethod = ClickMethod.MIDDLE;
 			}
 			shiftClick = plugin.getConfig().getBoolean("defaults.shift_click");
 		}

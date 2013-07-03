@@ -1,10 +1,9 @@
-doubleclick_speed_ms: 250
 autosave_seconds: 300
 log_level: INFO
 drop_excess: true
 default_group_name: '000-default'
 use_essentials_worth: true
 defaults:
-  click_mode: DOUBLE
+  click_mode: MIDDLE
   sort_mode: ID
   shift_click: true
