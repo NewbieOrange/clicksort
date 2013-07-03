@@ -34,6 +34,7 @@ import me.desht.dhutils.PermissionUtils;
 import me.desht.dhutils.commands.CommandManager;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -42,6 +43,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -51,11 +53,8 @@ import org.bukkit.scheduler.BukkitTask;
 import org.mcstats.MetricsLite;
 
 public class ClickSortPlugin extends JavaPlugin implements Listener {
-
-	private final Map<String, Long> lastClickTime = new HashMap<String, Long>();
-	private final Map<String, Integer> lastClickSlot = new HashMap<String, Integer>();
 	private final CommandManager cmds = new CommandManager(this);
-	private int doubleClickTime;
+	private final CooldownMessager messager = new CooldownMessager();
 	private PlayerSortingPrefs sortingPrefs;
 	private BukkitTask saveTask;
 	private ItemGrouping itemGroups;
@@ -139,7 +138,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 
 		String playerName = player.getName();
 
-		LogUtils.fine("inventory click by player " + playerName);
+		LogUtils.fine("inventory click by player " + playerName + ": type=" + event.getClick() + " slot=" + event.getSlot() + " rawslot=" + event.getRawSlot());
 
 		SortingMethod sortMethod = sortingPrefs.getSortingMethod(playerName);
 		ClickMethod clickMethod = sortingPrefs.getClickMethod(playerName);
@@ -153,13 +152,13 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 				} while (!sortMethod.isAvailable());
 				sortingPrefs.setSortingMethod(playerName, sortMethod);
 				MiscUtil.statusMessage(player, "Sort by " + sortMethod.toString() + ".  " + clickMethod.getInstruction());
-				MiscUtil.statusMessage(player, "Shift-Left-click any empty inventory slot to change.");
+				messager.message(player, "leftclick", 60, ChatColor.GRAY + ChatColor.ITALIC.toString() + "Shift-Left-click any empty inventory slot to change.");
 			} else if (event.isRightClick()) {
 				// shift-right-clicking an empty slot cycles click method for the player
 				clickMethod = clickMethod.next();
 				sortingPrefs.setClickMethod(playerName, clickMethod);
 				MiscUtil.statusMessage(player, clickMethod.getInstruction());
-				MiscUtil.statusMessage(player, "Shift-Right-click any empty inventory slot to change.");
+				messager.message(player, "rightclick", 60, ChatColor.GRAY + ChatColor.ITALIC.toString() + "Shift-Right-click any empty inventory slot to change.");
 			}
 			if (getConfig().getInt("autosave_seconds") == 0) {
 				sortingPrefs.save();
@@ -167,39 +166,21 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 			return;
 		}
 
-		if (clickMethod == ClickMethod.NONE) return;
-
-		if (!event.isLeftClick()) return;
-
-		if (clickMethod == ClickMethod.DOUBLE) {
-			long now = System.currentTimeMillis();
-			long last = lastClickTime.containsKey(playerName) ? lastClickTime.get(playerName) : 0L;
-			int slot = lastClickSlot.containsKey(playerName) ? lastClickSlot.get(playerName) : -1;
-			long delta = now - last;
-			if (delta < doubleClickTime && slot == event.getRawSlot()) {
-				// second click was quick enough - remove the record of the last click and
-				// proceed with sorting
-				lastClickTime.remove(playerName);
-				lastClickSlot.remove(playerName);
-
-				// the actual sorting is deferred till the end of the tick
-				// this is to allow any item on the cursor to be placed back in the
-				// inventory *before* the sorting is done
-				final SortingMethod sortMethod2 = sortMethod;
-				Bukkit.getScheduler().runTask(this, new Runnable() {
-					@Override
-					public void run() { sortInventory(event, sortMethod2); }
-				});
-			} else {
-				// last click was too long ago, or on a different inventory slot - record this
-				// as the first click of a potential new sequence
-				lastClickTime.put(playerName, now);
-				lastClickSlot.put(playerName, event.getRawSlot());
-			}
-		} else if (clickMethod == ClickMethod.SINGLE &&
-				event.getCurrentItem().getType() == Material.AIR &&
-				event.getCursor().getType() == Material.AIR) {
-			// single-left-click to sort, but only if an empty slot is clicked
+		boolean shouldSort;
+		switch (clickMethod) {
+		case SINGLE:
+			shouldSort = event.getClick() == ClickType.LEFT && event.getCurrentItem().getType() == Material.AIR && event.getCursor().getType() == Material.AIR;
+			break;
+		case DOUBLE:
+			shouldSort = event.getClick() == ClickType.DOUBLE_CLICK;
+			break;
+		case MIDDLE:
+			shouldSort = event.getClick() == ClickType.MIDDLE;
+			break;
+		default:
+			shouldSort = false;
+		}
+		if (shouldSort) {
 			final SortingMethod sortMethod2 = sortMethod;
 			Bukkit.getScheduler().runTask(this, new Runnable() {
 				@Override
@@ -224,8 +205,6 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 	}
 
 	public void processConfig() {
-		doubleClickTime = getConfig().getInt("doubleclick_speed_ms");
-
 		setupSaveTask();
 
 		String level = getConfig().getString("log_level");
