@@ -28,7 +28,7 @@ public class ShiftClickCommand extends AbstractCommand {
 			MiscUtil.statusMessage(sender, "Shift-click sort/click mode changing has been " + enabled + ".");
 			if (shiftClick) {
 				MiscUtil.statusMessage(sender, "&f/clicksort shiftclick&- to re-enable.");
-				MiscUtil.statusMessage(sender, "(&f/clicksort sort&- and &f/clicksort click&- to change sort/click mode)");
+				((ClickSortPlugin)plugin).getMessager().message(sender, "shiftclick" , 60, "(Use &f/clicksort sort&- and &f/clicksort click&- to change sort/click mode)");
 			} else {
 				MiscUtil.statusMessage(sender, "&f/clicksort shiftclick&- to disable.");
 			}

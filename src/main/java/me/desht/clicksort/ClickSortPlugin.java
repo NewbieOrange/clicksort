@@ -108,6 +108,10 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 		return instance;
 	}
 
+	public CooldownMessager getMessager() {
+		return messager;
+	}
+
 	/**
 	 * @return the sorting
 	 */

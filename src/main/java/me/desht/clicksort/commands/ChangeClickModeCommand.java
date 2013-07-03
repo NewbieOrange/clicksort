@@ -1,6 +1,5 @@
 package me.desht.clicksort.commands;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import me.desht.clicksort.ClickMethod;
