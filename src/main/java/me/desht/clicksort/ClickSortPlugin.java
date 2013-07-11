@@ -135,10 +135,16 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 	 */
 	@EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
 	public void onInventoryClicked(final InventoryClickEvent event) {
-		if (!(event.getWhoClicked() instanceof Player)) return;
-		if (event.getCurrentItem() == null) return;
+		if (!(event.getWhoClicked() instanceof Player)) {
+			return;
+		}
+		if (event.getCurrentItem() == null) {
+			return;
+		}
 		Player player = (Player)event.getWhoClicked();
-		if (!PermissionUtils.isAllowedTo(player, "clicksort.sort")) return;
+		if (!PermissionUtils.isAllowedTo(player, "clicksort.sort")) {
+			return;
+		}
 
 		String playerName = player.getName();
 
@@ -279,7 +285,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 				min = 9; max = inv.getSize();
 			}
 			break;
-		case CHEST: case DISPENSER:
+		case CHEST: case DISPENSER: case HOPPER: case DROPPER:
 			min = 0; max = inv.getSize();
 			break;
 		default:
