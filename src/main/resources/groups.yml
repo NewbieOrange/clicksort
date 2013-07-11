@@ -2,6 +2,9 @@
 # player sort mode is GROUP.  You can add as many or as few groups as you
 # please.
 #
+# See http://dev.bukkit.org/bukkit-plugins/clicksort/pages/sort-modes/#w-group
+# for more information.
+#
 # You can use anything you like for the group names, but they are sorted
 # alphabetically, so a numeric prefix as used below is recommended.
 #

@@ -1,6 +1,9 @@
 #
 # ClickSort values.yml file; provide values for items for sorting by value.
 #
+# See http://dev.bukkit.org/bukkit-plugins/clicksort/pages/sort-modes/#w-value
+# for more information.
+#
 # Format is:
 #   MATERIAL: VALUE
 # or
