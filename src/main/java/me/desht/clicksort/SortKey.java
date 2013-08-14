@@ -3,6 +3,8 @@ package me.desht.clicksort;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import me.desht.dhutils.LogUtils;
+
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -14,7 +16,13 @@ public class SortKey implements Comparable<SortKey> {
 	private final ItemMeta meta;
 
 	public SortKey(ItemStack stack, SortingMethod sortMethod) {
-		this.sortPrefix = sortMethod.makeSortPrefix(stack);
+		String prefix = sortMethod.makeSortPrefix(stack);
+		if (prefix == null) {
+			this.sortPrefix = stack.getType().toString();
+			LogUtils.warning("Can't determine sort prefix for " + stack + " (using " + this.sortPrefix + ")");
+		} else {
+			this.sortPrefix = prefix;
+		}
 		this.materialID = stack.getTypeId();
 		this.durability = stack.getDurability();
 		this.meta = stack.getItemMeta();
