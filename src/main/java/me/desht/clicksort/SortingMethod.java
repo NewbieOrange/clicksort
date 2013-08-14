@@ -43,7 +43,8 @@ public enum SortingMethod {
         case ID:
         	return String.format("%04d", stack.getTypeId());
         case NAME:
-        	return ItemNames.lookup(stack);
+        	String name = ItemNames.lookup(stack);
+        	return name == null ? null : name.replaceAll("\u00a7.", "");
         case GROUP:
         	plugin = ClickSortPlugin.getInstance();
         	String grp = plugin.getItemGrouping().getGroup(stack);
