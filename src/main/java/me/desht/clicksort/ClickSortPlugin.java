@@ -352,7 +352,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 		for (SortKey sortKey : MiscUtil.asSortedList(amounts.keySet())) {
 			int amount = amounts.get(sortKey);
 			LogUtils.finer("Process item [" + sortKey + "], amount = " + amount);
-			Material mat = Material.getMaterial(sortKey.getMaterialID());
+			Material mat = sortKey.getMaterial();
 			int maxStack = mat.getMaxStackSize();
 			LogUtils.finer("max stack size for " + mat + " = " + maxStack);
 			while (amount > maxStack) {

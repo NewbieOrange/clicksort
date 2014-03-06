@@ -5,12 +5,13 @@ import java.util.Map.Entry;
 
 import me.desht.dhutils.LogUtils;
 
+import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 public class SortKey implements Comparable<SortKey> {
 	private final String sortPrefix;
-	private final int materialID;
+	private final Material material;
 	private final short durability;
 	private final String metaStr;
 	private final ItemMeta meta;
@@ -23,7 +24,7 @@ public class SortKey implements Comparable<SortKey> {
 		} else {
 			this.sortPrefix = prefix;
 		}
-		this.materialID = stack.getTypeId();
+		this.material = stack.getType();
 		this.durability = stack.getDurability();
 		this.meta = stack.getItemMeta();
 		this.metaStr = makeMetaString();
@@ -39,8 +40,8 @@ public class SortKey implements Comparable<SortKey> {
 	/**
 	 * @return the materialID
 	 */
-	public int getMaterialID() {
-		return materialID;
+	public Material getMaterial() {
+		return material;
 	}
 
 	/**
@@ -58,7 +59,7 @@ public class SortKey implements Comparable<SortKey> {
 	}
 
 	public ItemStack toItemStack(int amount) {
-		ItemStack stack = new ItemStack(getMaterialID(), amount, getDurability());
+		ItemStack stack = new ItemStack(getMaterial(), amount, getDurability());
 		stack.setItemMeta(meta);
 		return stack;
 	}
@@ -70,7 +71,8 @@ public class SortKey implements Comparable<SortKey> {
 		int c = this.getSortPrefix().compareTo(other.getSortPrefix());
 		if (c != 0) return c;
 
-		c = this.getMaterialID() - other.getMaterialID();
+		// the Material enum members are arranged by item ID
+		c = this.getMaterial().ordinal() - other.getMaterial().ordinal();
 		if (c != 0) return c;
 
 		c = this.getDurability() - other.getDurability();
@@ -79,51 +81,36 @@ public class SortKey implements Comparable<SortKey> {
 		return this.getMetaStr().compareTo(other.getMetaStr());
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
 	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + durability;
-		result = prime * result + materialID;
-		result = prime * result + ((metaStr == null) ? 0 : metaStr.hashCode());
-		result = prime * result + ((sortPrefix == null) ? 0 : sortPrefix.hashCode());
-		return result;
-	}
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		SortKey other = (SortKey) obj;
-		if (durability != other.durability)
-			return false;
-		if (materialID != other.materialID)
-			return false;
-		if (metaStr == null) {
-			if (other.metaStr != null)
-				return false;
-		} else if (!metaStr.equals(other.metaStr))
-			return false;
-		if (sortPrefix == null) {
-			if (other.sortPrefix != null)
-				return false;
-		} else if (!sortPrefix.equals(other.sortPrefix))
-			return false;
+		SortKey sortKey = (SortKey) o;
+
+		if (durability != sortKey.durability) return false;
+		if (material != sortKey.material) return false;
+		if (meta != null ? !meta.equals(sortKey.meta) : sortKey.meta != null) return false;
+		if (!metaStr.equals(sortKey.metaStr)) return false;
+		if (!sortPrefix.equals(sortKey.sortPrefix)) return false;
+
 		return true;
 	}
 
-    private String makeMetaString() {
-    	if (meta == null) return "";
+	@Override
+	public int hashCode() {
+		int result = sortPrefix.hashCode();
+		result = 31 * result + material.hashCode();
+		result = 31 * result + (int) durability;
+		result = 31 * result + metaStr.hashCode();
+		result = 31 * result + (meta != null ? meta.hashCode() : 0);
+		return result;
+	}
+
+	private String makeMetaString() {
+    	if (meta == null) {
+		    return "";
+	    }
 		Map<String, Object> map = meta.serialize();
 
 		StringBuilder sb = new StringBuilder();
@@ -135,6 +122,6 @@ public class SortKey implements Comparable<SortKey> {
 
     @Override
     public String toString() {
-    	return String.format("SortKey[%s|%d|%d|%s]", getSortPrefix(), getMaterialID(), getDurability(), getMetaStr());
+    	return String.format("SortKey[%s|%s|%d|%s]", getSortPrefix(), getMaterial().toString(), getDurability(), getMetaStr());
     }
 }
