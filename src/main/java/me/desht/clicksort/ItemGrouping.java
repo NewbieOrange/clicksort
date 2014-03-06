@@ -52,6 +52,7 @@ public class ItemGrouping {
 				int tmp = v1; v1 = v0; v0 = tmp;
 			}
 			for (int i = v0; i <= v1; i++) {
+				//noinspection deprecation
 				addMapping(new MaterialData(i), grpName);
 			}
 		} else {

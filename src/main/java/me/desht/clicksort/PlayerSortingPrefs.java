@@ -30,8 +30,8 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 public class PlayerSortingPrefs {
 	private static final String SORT_PREFS_FILE = "sorting.yml";
-	private Map<String,SortPrefs> map = new HashMap<String, SortPrefs>();
-	private ClickSortPlugin plugin;
+	private final Map<String,SortPrefs> map = new HashMap<String, SortPrefs>();
+	private final ClickSortPlugin plugin;
 	private boolean saveNeeded;
 
 	public PlayerSortingPrefs(ClickSortPlugin plugin) {

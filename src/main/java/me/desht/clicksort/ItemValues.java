@@ -16,7 +16,7 @@ import me.desht.dhutils.JARUtil;
 import me.desht.dhutils.LogUtils;
 
 public class ItemValues {
-	public static final String mapFile = "values.yml";
+	private static final String MAP_FILE = "values.yml";
 
 	private final ClickSortPlugin plugin;
 	private File essWorthFile;
@@ -36,7 +36,7 @@ public class ItemValues {
 		}
 
 		// extract our own (blank-by-default) values.yml file
-		new JARUtil(plugin).extractResource(mapFile, plugin.getDataFolder());
+		new JARUtil(plugin).extractResource(MAP_FILE, plugin.getDataFolder());
 
 		available = false;
 	}
@@ -55,7 +55,7 @@ public class ItemValues {
 		}
 
 		// load our own values.yml file
-		File f = new File(plugin.getDataFolder(), mapFile);
+		File f = new File(plugin.getDataFolder(), MAP_FILE);
 		YamlConfiguration cfg = YamlConfiguration.loadConfiguration(f);
 		valueMap = new MemoryConfiguration();
 		for (String key : cfg.getKeys(false)) {

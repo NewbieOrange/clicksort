@@ -6,6 +6,7 @@ import me.desht.clicksort.ClickSortPlugin;
 import me.desht.clicksort.PlayerSortingPrefs;
 import me.desht.clicksort.SortingMethod;
 import me.desht.dhutils.DHUtilsException;
+import me.desht.dhutils.DHValidate;
 import me.desht.dhutils.MiscUtil;
 import me.desht.dhutils.commands.AbstractCommand;
 
@@ -27,9 +28,7 @@ public class ChangeSortModeCommand extends AbstractCommand {
 		try {
 			PlayerSortingPrefs prefs = ((ClickSortPlugin) plugin).getSortingPrefs();
 			SortingMethod sortMethod = SortingMethod.valueOf(args[0].toUpperCase());
-			if (!sortMethod.isAvailable()) {
-				throw new DHUtilsException("Sort method " + sortMethod + " is not available.");
-			}
+			DHValidate.isTrue(sortMethod.isAvailable(), "Sort method " + sortMethod + " is not available.");
 			prefs.setSortingMethod(sender.getName(), sortMethod);
 			MiscUtil.statusMessage(sender, "Sorting method has been set to: " + sortMethod);
 		} catch (IllegalArgumentException e) {

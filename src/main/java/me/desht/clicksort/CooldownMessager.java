@@ -8,7 +8,7 @@ import me.desht.dhutils.MiscUtil;
 import org.bukkit.command.CommandSender;
 
 public class CooldownMessager {
-	private Map<String, Long> cooldowns = new HashMap<String, Long>();
+	private final Map<String, Long> cooldowns = new HashMap<String, Long>();
 
 	public void message(CommandSender sender, String cooldown, int secs, String message) {
 		long last = getLast(sender, cooldown);

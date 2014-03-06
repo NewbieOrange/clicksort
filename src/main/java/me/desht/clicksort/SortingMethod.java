@@ -41,14 +41,16 @@ public enum SortingMethod {
 		ClickSortPlugin plugin;
         switch (this) {
         case ID:
-        	return String.format("%04d", stack.getTypeId());
+	        //noinspection deprecation
+	        return String.format("%04d", stack.getTypeId());
         case NAME:
         	String name = ItemNames.lookup(stack);
         	return name == null ? null : name.replaceAll("\u00a7.", "");
         case GROUP:
         	plugin = ClickSortPlugin.getInstance();
         	String grp = plugin.getItemGrouping().getGroup(stack);
-        	return String.format("%s-%04d", grp, stack.getTypeId());
+	        //noinspection deprecation
+	        return String.format("%s-%04d", grp, stack.getTypeId());
         case VALUE:
         	plugin = ClickSortPlugin.getInstance();
         	double value = plugin.getItemValues().getValue(stack);
