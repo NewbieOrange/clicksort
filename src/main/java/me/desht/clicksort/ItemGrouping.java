@@ -1,17 +1,17 @@
 package me.desht.clicksort;
 
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-
 import me.desht.dhutils.JARUtil;
 import me.desht.dhutils.LogUtils;
-import me.desht.dhutils.block.MaterialWithData;
-
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.Material;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.MaterialData;
+
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ItemGrouping {
 	private static final String mapFile = "groups.yml";
@@ -51,15 +51,15 @@ public class ItemGrouping {
 				int tmp = v1; v1 = v0; v0 = tmp;
 			}
 			for (int i = v0; i <= v1; i++) {
-				addMapping(MaterialWithData.get(i), grpName);
+				addMapping(new MaterialData(i), grpName);
 			}
 		} else {
-			addMapping(MaterialWithData.get(matName), grpName);
+			addMapping(parseMaterial(matName), grpName);
 		}
 	}
 
-	private void addMapping(MaterialWithData mat, String grpName) {
-		if (mat == null || Material.getMaterial(mat.getId()) == null) {
+	private void addMapping(MaterialData mat, String grpName) {
+		if (mat == null) {
 			throw new IllegalArgumentException();
 		}
 		String key = getKey(mat);
@@ -68,12 +68,11 @@ public class ItemGrouping {
 	}
 
 	public String getGroup(ItemStack stack) {
-		MaterialWithData mwd = MaterialWithData.get(stack.getTypeId(), stack.getDurability());
-		String group = mapping.get(getKey(mwd));
+		String group = mapping.get(getKey(stack.getData()));
 		if (group == null) {
     		group = plugin.getConfig().getString("default_group_name", "000-default");
     	}
-		LogUtils.finer("getGroup: " + mwd + " = " + group);
+		LogUtils.finer("getGroup: " + stack + " = " + group);
 		return group;
 	}
 
@@ -81,14 +80,27 @@ public class ItemGrouping {
 		return !mapping.isEmpty();
 	}
 
-	private String getKey(MaterialWithData mat) {
+	private String getKey(MaterialData mat) {
 		// Items with durability should not use the current damage level as part of
 		// grouping criteria.  Items which don't have durability *should* use the data
-		// value, e.g. 351:4 is lapis which could be considered either a dye or a gem
-		return hasDurability(mat) ? Integer.toString(mat.getId()): mat.toString();
+		// value, e.g. 351:4 is lapis, which could be considered either a dye or a gem
+		return hasDurability(mat) ? mat.getItemType().toString() : mat.toString();
 	}
 
-	private boolean hasDurability(MaterialWithData mat) {
-		return Material.getMaterial(mat.getId()).getMaxDurability() > 0;
+	private boolean hasDurability(MaterialData mat) {
+		return mat.getItemType().getMaxDurability() > 0;
+	}
+
+	private MaterialData parseMaterial(String s) {
+		String[] f = s.split(":");
+		Material mat;
+		if (StringUtils.isNumeric(f[0])) {
+			//noinspection deprecation
+			mat = Material.getMaterial(Integer.parseInt(f[0]));
+		} else {
+			mat = Material.matchMaterial(f[0]);
+		}
+		short dur = f.length == 2 ? Short.parseShort(f[1]) : 0;
+		return new ItemStack(mat, 1, dur).getData();
 	}
 }

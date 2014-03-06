@@ -65,15 +65,14 @@ public class ItemValues {
 	}
 
 	/**
-	 * Given a material,
+	 * Given an item stack, attempt to determine its value.
 	 *
-	 * @param mwd
-	 * @return
+	 * @return the item's value
 	 */
 	public double getValue(ItemStack stack) {
 		double val = 0.0;
 
-		Material mat = Material.getMaterial(stack.getTypeId());
+		Material mat = stack.getType();
 
 		// check possible worth.yml from Essentials first
 		if (essMap != null) {
