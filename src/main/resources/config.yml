@@ -1,8 +1,10 @@
+# See http://dev.bukkit.org/server-mods/clicksort/pages/configuration
 autosave_seconds: 300
 log_level: INFO
 drop_excess: true
 default_group_name: '000-default'
 use_essentials_worth: true
+coloured_console: true
 defaults:
   click_mode: MIDDLE
   sort_mode: ID

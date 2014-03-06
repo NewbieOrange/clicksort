@@ -23,10 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import me.desht.clicksort.commands.ChangeClickModeCommand;
-import me.desht.clicksort.commands.ChangeSortModeCommand;
-import me.desht.clicksort.commands.ReloadCommand;
-import me.desht.clicksort.commands.ShiftClickCommand;
+import me.desht.clicksort.commands.*;
 import me.desht.dhutils.DHUtilsException;
 import me.desht.dhutils.LogUtils;
 import me.desht.dhutils.MiscUtil;
@@ -69,14 +66,15 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 		PluginManager pm = this.getServer().getPluginManager();
 		pm.registerEvents(this, this);
 
+		getConfig().options().header("See http://dev.bukkit.org/server-mods/clicksort/pages/configuration");
+		getConfig().options().copyDefaults(true);
+		saveConfig();
+
+		cmds.registerCommand(new GetcfgCommand());
 		cmds.registerCommand(new ReloadCommand());
 		cmds.registerCommand(new ChangeClickModeCommand());
 		cmds.registerCommand(new ChangeSortModeCommand());
 		cmds.registerCommand(new ShiftClickCommand());
-
-		this.getConfig().options().copyDefaults(true);
-		this.getConfig().options().header("See http://dev.bukkit.org/server-mods/clicksort/pages/configuration");
-		this.saveConfig();
 
 		sortingPrefs = new PlayerSortingPrefs(this);
 		sortingPrefs.load();
@@ -95,11 +93,12 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 
 	@Override
 	public void onDisable() {
-		saveConfig();
 		sortingPrefs.save();
 		if (saveTask != null) {
 			saveTask.cancel();
 		}
+
+		saveConfig();
 
 		instance = null;
 	}
@@ -131,7 +130,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 	 * Inventory click handler.  Run with priority HIGHEST - this makes it run late, giving protection
 	 * plugins a chance to cancel the inventory click event first.
 	 *
-	 * @param event
+	 * @param event the event object
 	 */
 	@EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
 	public void onInventoryClicked(final InventoryClickEvent event) {
@@ -216,6 +215,8 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 
 	public void processConfig() {
 		setupSaveTask();
+
+		MiscUtil.setColouredConsole(getConfig().getBoolean("coloured_console"));
 
 		String level = getConfig().getString("log_level");
 		try {
