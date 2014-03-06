@@ -11,13 +11,9 @@ Copy ClickSort.jar into your plugins/ folder.  Restart/reload your server.  Done
 
 If you want to build ClickSort yourself, you will need Maven.
 
-1a) Get a copy of dhutils: "git clone https://github.com/desht/dhutils.git"
+1) Download ClickSort: "git clone https://github.com/desht/clicksort.git"
 
-1b) Build dhutils.  In the dhutils top-level directory, type: "mvn clean install"
-
-2a) Download ClickSort: "git clone https://github.com/desht/clicksort.git"
-
-2b) Build ClickSort. In the top-level directory, type: "mvn clean install"
+2) Build ClickSort. In the top-level directory, type: "mvn clean install"
 
 This should give you a copy of ClickSort.jar under the target/ directory.
 
@@ -28,7 +24,7 @@ To open the project in Eclipse, do one of the following:
 
 ## Usage
 
-Detailed documentation is available at bukkitdev: http://dev.bukkit.org/server-mods/clicksort/
+Detailed documentation is available at bukkitdev: http://dev.bukkit.org/bukkit-plugins/clicksort/
 
 ## License
 
