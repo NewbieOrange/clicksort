@@ -24,10 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import me.desht.clicksort.commands.*;
-import me.desht.dhutils.DHUtilsException;
-import me.desht.dhutils.LogUtils;
-import me.desht.dhutils.MiscUtil;
-import me.desht.dhutils.PermissionUtils;
+import me.desht.dhutils.*;
 import me.desht.dhutils.commands.CommandManager;
 
 import org.bukkit.Bukkit;
@@ -68,12 +65,18 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 
 		getConfig().options().header("See http://dev.bukkit.org/server-mods/clicksort/pages/configuration");
 		getConfig().options().copyDefaults(true);
+		getConfig().set("log_level", null); // superceded by debug_level
 		saveConfig();
 
-		cmds.registerCommand(new GetcfgCommand());
-		cmds.registerCommand(new ReloadCommand());
+		Debugger.getInstance().setPrefix("[ClickSort] ");
+		Debugger.getInstance().setLevel(getConfig().getInt("debug_level"));
+		Debugger.getInstance().setTarget(getServer().getConsoleSender());
+
 		cmds.registerCommand(new ChangeClickModeCommand());
 		cmds.registerCommand(new ChangeSortModeCommand());
+		cmds.registerCommand(new DebugCommand());
+		cmds.registerCommand(new GetcfgCommand());
+		cmds.registerCommand(new ReloadCommand());
 		cmds.registerCommand(new ShiftClickCommand());
 
 		sortingPrefs = new PlayerSortingPrefs(this);
@@ -147,7 +150,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 
 		String playerName = player.getName();
 
-		LogUtils.fine("inventory click by player " + playerName + ": type=" + event.getClick() + " slot=" + event.getSlot() + " rawslot=" + event.getRawSlot());
+		Debugger.getInstance().debug("inventory click by player " + playerName + ": type=" + event.getClick() + " slot=" + event.getSlot() + " rawslot=" + event.getRawSlot());
 
 		SortingMethod sortMethod = sortingPrefs.getSortingMethod(playerName);
 		ClickMethod clickMethod = sortingPrefs.getClickMethod(playerName);
@@ -218,12 +221,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 
 		MiscUtil.setColouredConsole(getConfig().getBoolean("coloured_console"));
 
-		String level = getConfig().getString("log_level");
-		try {
-			LogUtils.setLogLevel(level);
-		} catch (IllegalArgumentException e) {
-			LogUtils.warning("invalid log level " + level + " - ignored");
-		}
+		Debugger.getInstance().setLevel(getConfig().getInt("debug_level"));
 	}
 
 	private void setupMetrics() {
@@ -274,7 +272,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 			inv = event.getView().getBottomInventory();
 		}
 
-		LogUtils.fine("clicked inventory window " + inv.getType() + ", slot " + slot);
+		Debugger.getInstance().debug("clicked inventory window " + inv.getType() + ", slot " + slot);
 		int min, max;  // slot range to sort
 		switch (inv.getType()) {
 		case PLAYER:
@@ -313,7 +311,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 			// with max stack sizes, and we end up with an overflowing inventory after merging stacks.
 			MiscUtil.alertMessage(p, "Some items couldn't fit and were dropped!");
 			for (int i = nItems; i < sortedItems.size(); i++) {
-				LogUtils.fine("dropping " + sortedItems.get(i) + " by player " + p.getName());
+				Debugger.getInstance().debug("dropping " + sortedItems.get(i) + " by player " + p.getName());
 				p.getWorld().dropItemNaturally(p.getLocation(), sortedItems.get(i));
 			}
 		}
@@ -332,7 +330,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 		// phase 1: extract a list of unique material/data/item-meta strings and use those as keys
 		// into a hash which maps items to quantities
 		int nItems = max - min;
-		LogUtils.fine("sortAndMerge: min = " + min + ", max = " + max + ", size = " + nItems);
+		Debugger.getInstance().debug("sortAndMerge: min = " + min + ", max = " + max + ", size = " + nItems);
 		for (int i = 0; i < nItems; i++) {
 			ItemStack is = items[min + i];
 			if (is != null) {
@@ -351,10 +349,10 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 		// phase 2: sort the extracted item keys and reconstruct the item stacks from those keys
 		for (SortKey sortKey : MiscUtil.asSortedList(amounts.keySet())) {
 			int amount = amounts.get(sortKey);
-			LogUtils.finer("Process item [" + sortKey + "], amount = " + amount);
+			Debugger.getInstance().debug(2, "Process item [" + sortKey + "], amount = " + amount);
 			Material mat = sortKey.getMaterial();
 			int maxStack = mat.getMaxStackSize();
-			LogUtils.finer("max stack size for " + mat + " = " + maxStack);
+			Debugger.getInstance().debug(2, "max stack size for " + mat + " = " + maxStack);
 			while (amount > maxStack) {
 				res.add(sortKey.toItemStack(maxStack));
 				amount -= maxStack;

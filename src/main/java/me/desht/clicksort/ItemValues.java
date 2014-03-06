@@ -2,6 +2,7 @@ package me.desht.clicksort;
 
 import java.io.File;
 
+import me.desht.dhutils.Debugger;
 import org.bukkit.Material;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
@@ -49,7 +50,7 @@ public class ItemValues {
 			if (essMap == null) {
 				LogUtils.warning("can't find valid worth.yml file from Essentials");
 			} else {
-				LogUtils.fine("loaded Essentials worth.yml file");
+				Debugger.getInstance().debug("loaded Essentials worth.yml file");
 			}
 		}
 
@@ -79,7 +80,7 @@ public class ItemValues {
 			String s = mat.toString().replace("_", "").toLowerCase();
 			String s1 = s + "." + stack.getDurability();
 			val = essMap.getDouble(s1, essMap.getDouble(s, 0.0));
-			LogUtils.finer("Essentials worth.yml: " + s + " = " + val);
+			Debugger.getInstance().debug(2, "Essentials worth.yml: " + s + " = " + val);
 		}
 
 		// then check ClickSort's own values.yml (which overrides Essentials if exists)

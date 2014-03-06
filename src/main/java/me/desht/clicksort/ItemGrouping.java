@@ -1,5 +1,6 @@
 package me.desht.clicksort;
 
+import me.desht.dhutils.Debugger;
 import me.desht.dhutils.JARUtil;
 import me.desht.dhutils.LogUtils;
 import org.apache.commons.lang.StringUtils;
@@ -64,7 +65,7 @@ public class ItemGrouping {
 		}
 		String key = getKey(mat);
 		mapping.put(getKey(mat), grpName);
-		LogUtils.finer("addMapping: " + key + " = " + grpName);
+		Debugger.getInstance().debug(2, "addMapping: " + key + " = " + grpName);
 	}
 
 	public String getGroup(ItemStack stack) {
@@ -72,7 +73,7 @@ public class ItemGrouping {
 		if (group == null) {
     		group = plugin.getConfig().getString("default_group_name", "000-default");
     	}
-		LogUtils.finer("getGroup: " + stack + " = " + group);
+		Debugger.getInstance().debug(2, "getGroup: " + stack + " = " + group);
 		return group;
 	}
 

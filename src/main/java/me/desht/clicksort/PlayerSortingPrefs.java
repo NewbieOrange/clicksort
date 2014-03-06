@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import me.desht.dhutils.Debugger;
 import me.desht.dhutils.LogUtils;
 
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -69,7 +70,7 @@ public class PlayerSortingPrefs {
 		SortPrefs prefs = map.get(playerName);
 		if (prefs == null) {
 			prefs = new SortPrefs();
-			LogUtils.fine("initialise new sorting preferences for " + playerName + ": " + prefs);
+			Debugger.getInstance().debug("initialise new sorting preferences for " + playerName + ": " + prefs);
 			map.put(playerName, prefs);
 			save();
 		}
@@ -81,7 +82,7 @@ public class PlayerSortingPrefs {
 		for (String k : conf.getKeys(false)) {
 			map.put(k, new SortPrefs(conf.getString(k + ".sort"), conf.getString(k + ".click"), conf.getBoolean(k + ".shiftClick", true)));
 		}
-		LogUtils.fine("loaded player sorting preferences (" + map.size() + " records)");
+		Debugger.getInstance().debug("loaded player sorting preferences (" + map.size() + " records)");
 	}
 
 	public void autosave() {
@@ -104,7 +105,7 @@ public class PlayerSortingPrefs {
 		} catch (IOException e) {
 			LogUtils.severe("can't save " + SORT_PREFS_FILE + ": " + e.getMessage());
 		}
-		LogUtils.fine("saved player sorting preferences (" + map.size() + " records)");
+		Debugger.getInstance().debug("saved player sorting preferences (" + map.size() + " records)");
 		saveNeeded = false;
 	}
 
