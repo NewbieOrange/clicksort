@@ -101,8 +101,6 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 			saveTask.cancel();
 		}
 
-		saveConfig();
-
 		instance = null;
 	}
 
