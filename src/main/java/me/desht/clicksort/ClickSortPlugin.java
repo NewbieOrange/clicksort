@@ -282,7 +282,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 				min = 9; max = inv.getSize();
 			}
 			break;
-		case CHEST: case DISPENSER: case HOPPER: case DROPPER:
+		case CHEST: case DISPENSER: case HOPPER: case DROPPER: case ENDER_CHEST:
 			min = 0; max = inv.getSize();
 			break;
 		default:
