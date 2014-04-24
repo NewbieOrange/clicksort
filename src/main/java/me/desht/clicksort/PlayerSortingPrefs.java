@@ -94,15 +94,14 @@ public class PlayerSortingPrefs {
 		Debugger.getInstance().debug("loaded player sorting preferences (" + prefsMap.size() + " records)");
 
 		if (uuidMigrationNeeded) {
-			LogUtils.info("Migrating player prefs to UUIDs");
-			Bukkit.getScheduler().runTaskAsynchronously(ClickSortPlugin.getInstance(), new Runnable() {
+			prefsMap.clear();
+			LogUtils.info("Migrating player prefs to UUIDs...");
+			Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable() {
 				@Override
 				public void run() {
-					List<String> names = new ArrayList<String>();
-					names.addAll(conf.getKeys(false));
-					UUIDFetcher uf = new UUIDFetcher(names, true);
+					UUIDFetcher uf = new UUIDFetcher(new ArrayList<String>(conf.getKeys(false)), true);
 					try {
-						new SyncUUIDTask(conf, uf.call()).runTask(ClickSortPlugin.getInstance());
+						new SyncUUIDTask(conf, uf.call()).runTask(plugin);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
