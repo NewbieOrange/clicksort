@@ -19,18 +19,22 @@ along with ClickSort.  If not, see <http://www.gnu.org/licenses/>.
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 import me.desht.dhutils.Debugger;
 import me.desht.dhutils.LogUtils;
 
+import me.desht.dhutils.MiscUtil;
+import me.desht.dhutils.UUIDFetcher;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 
 public class PlayerSortingPrefs {
 	private static final String SORT_PREFS_FILE = "sorting.yml";
-	private final Map<String,SortPrefs> map = new HashMap<String, SortPrefs>();
+	private final Map<UUID,SortPrefs> prefsMap = new HashMap<UUID, SortPrefs>();
 	private final ClickSortPlugin plugin;
 	private boolean saveNeeded;
 
@@ -39,50 +43,72 @@ public class PlayerSortingPrefs {
 		this.saveNeeded = false;
 	}
 
-	public SortingMethod getSortingMethod(String playerName) {
-		return getPrefs(playerName).sortMethod;
+	public SortingMethod getSortingMethod(Player player) {
+		return getPrefs(player).sortMethod;
 	}
 
-	public ClickMethod getClickMethod(String playerName) {
-		return getPrefs(playerName).clickMethod;
+	public ClickMethod getClickMethod(Player player) {
+		return getPrefs(player).clickMethod;
 	}
 
-	public void setSortingMethod(String playerName, SortingMethod sortMethod) {
-		getPrefs(playerName).sortMethod = sortMethod;
+	public void setSortingMethod(Player player, SortingMethod sortMethod) {
+		getPrefs(player).sortMethod = sortMethod;
 		saveNeeded = true;
 	}
 
-	public void setClickMethod(String playerName, ClickMethod clickMethod) {
-		getPrefs(playerName).clickMethod = clickMethod;
+	public void setClickMethod(Player player, ClickMethod clickMethod) {
+		getPrefs(player).clickMethod = clickMethod;
 		saveNeeded = true;
 	}
 
-	public boolean getShiftClickAllowed(String playerName) {
-		return getPrefs(playerName).shiftClick;
+	public boolean getShiftClickAllowed(Player player) {
+		return getPrefs(player).shiftClick;
 	}
 
-	public void setShiftClickAllowed(String playerName, boolean allow) {
-		getPrefs(playerName).shiftClick = allow;
+	public void setShiftClickAllowed(Player player, boolean allow) {
+		getPrefs(player).shiftClick = allow;
 		saveNeeded = true;
 	}
 
-	private SortPrefs getPrefs(String playerName) {
-		SortPrefs prefs = map.get(playerName);
+	private SortPrefs getPrefs(Player player) {
+		SortPrefs prefs = prefsMap.get(player.getUniqueId());
 		if (prefs == null) {
 			prefs = new SortPrefs();
-			Debugger.getInstance().debug("initialise new sorting preferences for " + playerName + ": " + prefs);
-			map.put(playerName, prefs);
+			Debugger.getInstance().debug("initialise new sorting preferences for " + player.getUniqueId() + "(" + player.getName() + "): " + prefs);
+			prefsMap.put(player.getUniqueId(), prefs);
 			save();
 		}
 		return prefs;
 	}
 
 	public void load() {
-		YamlConfiguration conf = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), SORT_PREFS_FILE));
+		final YamlConfiguration conf = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), SORT_PREFS_FILE));
+		boolean uuidMigrationNeeded = false;
 		for (String k : conf.getKeys(false)) {
-			map.put(k, new SortPrefs(conf.getString(k + ".sort"), conf.getString(k + ".click"), conf.getBoolean(k + ".shiftClick", true)));
+			if (!MiscUtil.looksLikeUUID(k)) {
+				uuidMigrationNeeded = true;
+				break;
+			}
+			prefsMap.put(UUID.fromString(k), new SortPrefs(conf.getString(k + ".sort"), conf.getString(k + ".click"), conf.getBoolean(k + ".shiftClick", true)));
 		}
-		Debugger.getInstance().debug("loaded player sorting preferences (" + map.size() + " records)");
+		Debugger.getInstance().debug("loaded player sorting preferences (" + prefsMap.size() + " records)");
+
+		if (uuidMigrationNeeded) {
+			LogUtils.info("Migrating player prefs to UUIDs");
+			Bukkit.getScheduler().runTaskAsynchronously(ClickSortPlugin.getInstance(), new Runnable() {
+				@Override
+				public void run() {
+					List<String> names = new ArrayList<String>();
+					names.addAll(conf.getKeys(false));
+					UUIDFetcher uf = new UUIDFetcher(names, true);
+					try {
+						new SyncUUIDTask(conf, uf.call()).runTask(ClickSortPlugin.getInstance());
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			});
+		}
 	}
 
 	public void autosave() {
@@ -94,10 +120,10 @@ public class PlayerSortingPrefs {
 	public void save() {
 		YamlConfiguration conf = new YamlConfiguration();
 
-		for (Entry<String,SortPrefs> entry : map.entrySet()) {
-			conf.set(entry.getKey() + ".sort", entry.getValue().sortMethod.toString());
-			conf.set(entry.getKey() + ".click", entry.getValue().clickMethod.toString());
-			conf.set(entry.getKey() + ".shiftClick", entry.getValue().shiftClick);
+		for (Entry<UUID,SortPrefs> entry : prefsMap.entrySet()) {
+			conf.set(entry.getKey().toString() + ".sort", entry.getValue().sortMethod.toString());
+			conf.set(entry.getKey().toString() + ".click", entry.getValue().clickMethod.toString());
+			conf.set(entry.getKey().toString() + ".shiftClick", entry.getValue().shiftClick);
 		}
 
 		try {
@@ -105,7 +131,7 @@ public class PlayerSortingPrefs {
 		} catch (IOException e) {
 			LogUtils.severe("can't save " + SORT_PREFS_FILE + ": " + e.getMessage());
 		}
-		Debugger.getInstance().debug("saved player sorting preferences (" + map.size() + " records)");
+		Debugger.getInstance().debug("saved player sorting preferences (" + prefsMap.size() + " records)");
 		saveNeeded = false;
 	}
 
@@ -139,6 +165,29 @@ public class PlayerSortingPrefs {
 		@Override
 		public String toString() {
 			return "SortPrefs [sort=" + sortMethod + " click=" + clickMethod + " shiftclick=" + shiftClick + "]";
+		}
+	}
+
+	private class SyncUUIDTask extends BukkitRunnable {
+		private final Map<String, UUID> uuidMap;
+		private final YamlConfiguration conf;
+
+		public SyncUUIDTask(YamlConfiguration conf, Map<String, UUID> map) {
+			this.uuidMap = map;
+			this.conf = conf;
+		}
+
+		@Override
+		public void run() {
+			for (String k : conf.getKeys(false)) {
+				if (uuidMap.containsKey(k)) {
+					prefsMap.put(uuidMap.get(k), new SortPrefs(conf.getString(k + ".sort"), conf.getString(k + ".click"), conf.getBoolean(k + ".shiftClick", true)));
+				} else {
+					LogUtils.warning("can't find UUID for player: " + k);
+				}
+			}
+			LogUtils.info("Player sort preferences migrated to UUIDs");
+			save();
 		}
 	}
 }

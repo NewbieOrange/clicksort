@@ -6,6 +6,7 @@ import me.desht.dhutils.MiscUtil;
 import me.desht.dhutils.commands.AbstractCommand;
 
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 public class ShiftClickCommand extends AbstractCommand {
@@ -19,11 +20,12 @@ public class ShiftClickCommand extends AbstractCommand {
 	@Override
 	public boolean execute(Plugin plugin, CommandSender sender, String[] args) {
 		notFromConsole(sender);
+		Player player = (Player) sender;
 
 		try {
 			PlayerSortingPrefs prefs = ((ClickSortPlugin) plugin).getSortingPrefs();
-			boolean shiftClick = prefs.getShiftClickAllowed(sender.getName());
-			prefs.setShiftClickAllowed(sender.getName(), !shiftClick);
+			boolean shiftClick = prefs.getShiftClickAllowed(player);
+			prefs.setShiftClickAllowed(player, !shiftClick);
 			String enabled = shiftClick ? "DISABLED" : "ENABLED";
 			MiscUtil.statusMessage(sender, "Shift-click sort/click mode changing has been " + enabled + ".");
 			if (shiftClick) {

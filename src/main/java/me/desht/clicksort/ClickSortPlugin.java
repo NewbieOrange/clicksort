@@ -58,6 +58,8 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 
 	@Override
 	public void onEnable() {
+		instance = this;
+
 		LogUtils.init(this);
 
 		PluginManager pm = this.getServer().getPluginManager();
@@ -90,8 +92,6 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 		processConfig();
 
 		setupMetrics();
-
-		instance = this;
 	}
 
 	@Override
@@ -150,9 +150,9 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 
 		Debugger.getInstance().debug("inventory click by player " + playerName + ": type=" + event.getClick() + " slot=" + event.getSlot() + " rawslot=" + event.getRawSlot());
 
-		SortingMethod sortMethod = sortingPrefs.getSortingMethod(playerName);
-		ClickMethod clickMethod = sortingPrefs.getClickMethod(playerName);
-		boolean allowShiftClick = sortingPrefs.getShiftClickAllowed(playerName);
+		SortingMethod sortMethod = sortingPrefs.getSortingMethod(player);
+		ClickMethod clickMethod = sortingPrefs.getClickMethod(player);
+		boolean allowShiftClick = sortingPrefs.getShiftClickAllowed(player);
 
 		if (event.getCurrentItem().getType() == Material.AIR &&	event.isShiftClick() && allowShiftClick) {
 			if (event.isLeftClick() && clickMethod != ClickMethod.NONE) {
@@ -160,13 +160,13 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 				do {
 					sortMethod = sortMethod.next();
 				} while (!sortMethod.isAvailable());
-				sortingPrefs.setSortingMethod(playerName, sortMethod);
+				sortingPrefs.setSortingMethod(player, sortMethod);
 				MiscUtil.statusMessage(player, "Sort by " + sortMethod.toString() + ".  " + clickMethod.getInstruction());
 				messager.message(player, "leftclick", 60, ChatColor.GRAY + ChatColor.ITALIC.toString() + "Shift-Left-click any empty inventory slot to change.");
 			} else if (event.isRightClick()) {
 				// shift-right-clicking an empty slot cycles click method for the player
 				clickMethod = clickMethod.next();
-				sortingPrefs.setClickMethod(playerName, clickMethod);
+				sortingPrefs.setClickMethod(player, clickMethod);
 				MiscUtil.statusMessage(player, clickMethod.getInstruction());
 				messager.message(player, "rightclick", 60, ChatColor.GRAY + ChatColor.ITALIC.toString() + "Shift-Right-click any empty inventory slot to change.");
 			}

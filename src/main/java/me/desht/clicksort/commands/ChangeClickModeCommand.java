@@ -9,6 +9,7 @@ import me.desht.dhutils.MiscUtil;
 import me.desht.dhutils.commands.AbstractCommand;
 
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 public class ChangeClickModeCommand extends AbstractCommand {
@@ -26,7 +27,7 @@ public class ChangeClickModeCommand extends AbstractCommand {
 		try {
 			PlayerSortingPrefs prefs = ((ClickSortPlugin) plugin).getSortingPrefs();
 			ClickMethod clickMethod = ClickMethod.valueOf(args[0].toUpperCase());
-			prefs.setClickMethod(sender.getName(), clickMethod);
+			prefs.setClickMethod((Player) sender, clickMethod);
 			MiscUtil.statusMessage(sender, "Click method has been set to: " + clickMethod);
 		} catch (IllegalArgumentException e) {
 			showUsage(sender);
