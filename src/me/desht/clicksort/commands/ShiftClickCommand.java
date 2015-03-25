@@ -34,7 +34,7 @@ public class ShiftClickCommand extends AbstractCommand
             String enabled = shiftClick ? "DISABLED" : "ENABLED";
             MiscUtil.statusMessage(
                     sender,
-                    LanguageLoader.getColoredMessage("setModeChangingStatus").replace(
+                    LanguageLoader.getColoredMessage("setShiftClickStatus").replace(
                             "%status%", enabled));
             if (shiftClick)
             {
