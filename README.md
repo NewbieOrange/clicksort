@@ -9,7 +9,7 @@ Copy ClickSort.jar into your plugins/ folder.  Restart/reload your server.  Done
 
 ## Building
 
-1) Download ClickSort: "git clone https://github.com/desht/clicksort.git"
+1) Download ClickSort: "git clone https://github.com/NewbieOrange/clicksort.git"
 
 2) Build ClickSort.
 
