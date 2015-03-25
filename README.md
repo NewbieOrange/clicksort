@@ -9,18 +9,11 @@ Copy ClickSort.jar into your plugins/ folder.  Restart/reload your server.  Done
 
 ## Building
 
-If you want to build ClickSort yourself, you will need Maven.
-
 1) Download ClickSort: "git clone https://github.com/desht/clicksort.git"
 
-2) Build ClickSort. In the top-level directory, type: "mvn clean install"
+2) Build ClickSort.
 
-This should give you a copy of ClickSort.jar under the target/ directory.
-
-To open the project in Eclipse, do one of the following:
-
-1) (Recommended) Install the m2e plugin, and import the project (File -> Import -> Existing Maven Project)
-2) Alternatively use 'mvn eclipse:eclipse' to create the .project and .classpath files.
+This should give you a copy of ClickSort.jar under your target directory.
 
 ## Usage
 
