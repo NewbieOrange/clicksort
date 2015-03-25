@@ -63,6 +63,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener
         instance = this;
         
         LogUtils.init(this);
+        LanguageLoader.init(this);
         
         PluginManager pm = this.getServer().getPluginManager();
         pm.registerEvents(this, this);
