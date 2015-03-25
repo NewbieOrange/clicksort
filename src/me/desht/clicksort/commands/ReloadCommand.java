@@ -21,6 +21,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 
 import me.desht.clicksort.ClickSortPlugin;
+import me.desht.clicksort.LanguageLoader;
 import me.desht.dhutils.MiscUtil;
 import me.desht.dhutils.commands.AbstractCommand;
 
@@ -42,7 +43,7 @@ public class ReloadCommand extends AbstractCommand
         csPlugin.processConfig();
         csPlugin.getItemGrouping().load();
         csPlugin.getItemValues().load();
-        MiscUtil.statusMessage(sender, "ClickSort config has been reloaded");
+        MiscUtil.statusMessage(sender, LanguageLoader.getColoredMessage("configReloaded"));
         
         return true;
     }

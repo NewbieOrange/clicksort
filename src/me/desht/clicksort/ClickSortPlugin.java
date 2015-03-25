@@ -186,11 +186,17 @@ public class ClickSortPlugin extends JavaPlugin implements Listener
                 }
                 while (!sortMethod.isAvailable());
                 sortingPrefs.setSortingMethod(player, sortMethod);
-                MiscUtil.statusMessage(player, "Sort by " + sortMethod.toString() + ".  "
-                        + clickMethod.getInstruction());
-                messager.message(player, "leftclick", 60, ChatColor.GRAY
-                        + ChatColor.ITALIC.toString()
-                        + "Shift-Left-click any empty inventory slot to change.");
+                MiscUtil.statusMessage(
+                        player,
+                        LanguageLoader.getColoredMessage("sortBy")
+                                .replace("%method%", sortMethod.toString())
+                                .replace("%instruction%", clickMethod.getInstruction()));
+                messager.message(
+                        player,
+                        "leftclick",
+                        60,
+                        ChatColor.GRAY + ChatColor.ITALIC.toString()
+                                + LanguageLoader.getColoredMessage("shiftLeftToChange"));
             }
             else if (event.isRightClick())
             {
@@ -199,9 +205,12 @@ public class ClickSortPlugin extends JavaPlugin implements Listener
                 clickMethod = clickMethod.next();
                 sortingPrefs.setClickMethod(player, clickMethod);
                 MiscUtil.statusMessage(player, clickMethod.getInstruction());
-                messager.message(player, "rightclick", 60, ChatColor.GRAY
-                        + ChatColor.ITALIC.toString()
-                        + "Shift-Right-click any empty inventory slot to change.");
+                messager.message(
+                        player,
+                        "rightclick",
+                        60,
+                        ChatColor.GRAY + ChatColor.ITALIC.toString()
+                                + LanguageLoader.getColoredMessage("shiftRightToChange"));
             }
             if (getConfig().getInt("autosave_seconds") == 0)
             {
@@ -376,7 +385,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener
         
         if (nItems < sortedItems.size() && !getConfig().getBoolean("drop_excess"))
         {
-            MiscUtil.errorMessage(p, "Inventory overflow detected!  Items not sorted.");
+            MiscUtil.errorMessage(p, LanguageLoader.getColoredMessage("invOverFlow"));
             return;
         }
         
@@ -392,7 +401,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener
             // plugin has been messing
             // with max stack sizes, and we end up with an overflowing inventory
             // after merging stacks.
-            MiscUtil.alertMessage(p, "Some items couldn't fit and were dropped!");
+            MiscUtil.alertMessage(p, LanguageLoader.getColoredMessage("dropItems"));
             for (int i = nItems; i < sortedItems.size(); i++)
             {
                 Debugger.getInstance().debug(

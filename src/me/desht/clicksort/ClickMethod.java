@@ -15,13 +15,13 @@ public enum ClickMethod
         switch (this)
         {
             case SINGLE:
-                return "Single-click an empty inventory slot to sort.";
+                return LanguageLoader.getMessage("instructionSingle");
             case DOUBLE:
-                return "Double-click to sort.";
+                return LanguageLoader.getMessage("instructionDouble");
             case MIDDLE:
-                return "Middle-click to sort.";
+                return LanguageLoader.getMessage("instructionMiddle");
             default:
-                return "Click-sorting has been disabled.";
+                return LanguageLoader.getMessage("instructionDisabled");
         }
     }
 }

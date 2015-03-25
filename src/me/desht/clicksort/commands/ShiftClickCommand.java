@@ -1,6 +1,7 @@
 package me.desht.clicksort.commands;
 
 import me.desht.clicksort.ClickSortPlugin;
+import me.desht.clicksort.LanguageLoader;
 import me.desht.clicksort.PlayerSortingPrefs;
 import me.desht.dhutils.MiscUtil;
 import me.desht.dhutils.commands.AbstractCommand;
@@ -31,19 +32,21 @@ public class ShiftClickCommand extends AbstractCommand
             boolean shiftClick = prefs.getShiftClickAllowed(player);
             prefs.setShiftClickAllowed(player, !shiftClick);
             String enabled = shiftClick ? "DISABLED" : "ENABLED";
-            MiscUtil.statusMessage(sender,
-                    "Shift-click sort/click mode changing has been " + enabled + ".");
+            MiscUtil.statusMessage(
+                    sender,
+                    LanguageLoader.getColoredMessage("setModeChangingStatus").replace(
+                            "%status%", enabled));
             if (shiftClick)
             {
-                MiscUtil.statusMessage(sender, "&f/clicksort shiftclick&- to re-enable.");
-                ((ClickSortPlugin) plugin)
-                        .getMessager()
-                        .message(sender, "shiftclick", 60,
-                                "(Use &f/clicksort sort&- and &f/clicksort click&- to change sort/click mode)");
+                MiscUtil.statusMessage(sender,
+                        LanguageLoader.getColoredMessage("tipToReEnable"));
+                ((ClickSortPlugin) plugin).getMessager().message(sender, "shiftclick",
+                        60, LanguageLoader.getColoredMessage("tipToChangeMode"));
             }
             else
             {
-                MiscUtil.statusMessage(sender, "&f/clicksort shiftclick&- to disable.");
+                MiscUtil.statusMessage(sender,
+                        LanguageLoader.getColoredMessage("tipToDisable"));
             }
         }
         catch (IllegalArgumentException e)

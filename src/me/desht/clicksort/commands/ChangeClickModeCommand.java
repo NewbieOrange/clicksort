@@ -4,6 +4,7 @@ import java.util.List;
 
 import me.desht.clicksort.ClickMethod;
 import me.desht.clicksort.ClickSortPlugin;
+import me.desht.clicksort.LanguageLoader;
 import me.desht.clicksort.PlayerSortingPrefs;
 import me.desht.dhutils.MiscUtil;
 import me.desht.dhutils.commands.AbstractCommand;
@@ -32,7 +33,10 @@ public class ChangeClickModeCommand extends AbstractCommand
             PlayerSortingPrefs prefs = ((ClickSortPlugin) plugin).getSortingPrefs();
             ClickMethod clickMethod = ClickMethod.valueOf(args[0].toUpperCase());
             prefs.setClickMethod((Player) sender, clickMethod);
-            MiscUtil.statusMessage(sender, "Click method has been set to: " + clickMethod);
+            MiscUtil.statusMessage(
+                    sender,
+                    LanguageLoader.getColoredMessage("setClickMethodTo").replace(
+                            "%method%", clickMethod.toString()));
         }
         catch (IllegalArgumentException e)
         {

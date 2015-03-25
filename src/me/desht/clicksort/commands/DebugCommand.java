@@ -1,9 +1,11 @@
 package me.desht.clicksort.commands;
 
+import me.desht.clicksort.LanguageLoader;
 import me.desht.dhutils.DHUtilsException;
 import me.desht.dhutils.Debugger;
 import me.desht.dhutils.MiscUtil;
 import me.desht.dhutils.commands.AbstractCommand;
+
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 
@@ -33,12 +35,15 @@ public class DebugCommand extends AbstractCommand
             }
             catch (NumberFormatException e)
             {
-                throw new DHUtilsException("Invalid debug level: " + args[0]);
+                throw new DHUtilsException(LanguageLoader.getColoredMessage(
+                        "invaildDebugLevel").replace("%level%", args[0]));
             }
         }
         
-        MiscUtil.statusMessage(sender, "Debug level is now "
-                + Debugger.getInstance().getLevel());
+        MiscUtil.statusMessage(
+                sender,
+                LanguageLoader.getColoredMessage("setDebugLevelTo").replace("%level%",
+                        String.valueOf(Debugger.getInstance().getLevel())));
         return true;
     }
 }

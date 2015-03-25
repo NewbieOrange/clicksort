@@ -3,6 +3,7 @@ package me.desht.clicksort.commands;
 import java.util.List;
 
 import me.desht.clicksort.ClickSortPlugin;
+import me.desht.clicksort.LanguageLoader;
 import me.desht.clicksort.PlayerSortingPrefs;
 import me.desht.clicksort.SortingMethod;
 import me.desht.dhutils.DHValidate;
@@ -32,11 +33,14 @@ public class ChangeSortModeCommand extends AbstractCommand
         {
             PlayerSortingPrefs prefs = ((ClickSortPlugin) plugin).getSortingPrefs();
             SortingMethod sortMethod = SortingMethod.valueOf(args[0].toUpperCase());
-            DHValidate.isTrue(sortMethod.isAvailable(), "Sort method " + sortMethod
-                    + " is not available.");
+            DHValidate.isTrue(sortMethod.isAvailable(),
+                    LanguageLoader.getColoredMessage("sortingMethodNotAvailable")
+                            .replace("%method", sortMethod.toString()));
             prefs.setSortingMethod((Player) sender, sortMethod);
-            MiscUtil.statusMessage(sender, "Sorting method has been set to: "
-                    + sortMethod);
+            MiscUtil.statusMessage(
+                    sender,
+                    LanguageLoader.getColoredMessage("setSortingMethodTo").replace(
+                            "%method%", sortMethod.toString()));
         }
         catch (IllegalArgumentException e)
         {
