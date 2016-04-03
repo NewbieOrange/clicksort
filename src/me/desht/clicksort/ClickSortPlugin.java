@@ -46,6 +46,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.mcstats.MetricsLite;
 
+import cn.citycraft.PluginHelper.utils.LocalUtil;
+
 public class ClickSortPlugin extends JavaPlugin implements Listener
 {
     private final CommandManager cmds = new CommandManager(this);
@@ -71,7 +73,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener
         getConfig().options().header(
                 "See http://dev.bukkit.org/server-mods/clicksort/pages/configuration");
         getConfig().options().copyDefaults(true);
-        getConfig().set("log_level", null); // superceded by debug_level
+        getConfig().set("log_level", null); // superseded by debug_level
         saveConfig();
         
         Debugger.getInstance().setPrefix("[ClickSort] ");
@@ -92,6 +94,8 @@ public class ClickSortPlugin extends JavaPlugin implements Listener
         itemGroups.load();
         itemValues = new ItemValues(this);
         itemValues.load();
+        
+        LocalUtil.init(this);
         
         processConfig();
         
@@ -363,7 +367,8 @@ public class ClickSortPlugin extends JavaPlugin implements Listener
                 {
                     // main player inventory
                     min = 9;
-                    max = inv.getSize();
+                    // don't sort equipments and off-hand
+                    max = 36;
                 }
                 break;
             case CHEST:

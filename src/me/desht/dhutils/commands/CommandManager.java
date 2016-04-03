@@ -218,7 +218,7 @@ public class CommandManager
         if (sender instanceof Player)
         {
             Player p = (Player) sender;
-            p.playSound(p.getLocation(), Sound.NOTE_BASS, 1.0f, 1.0f);
+            p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BASS, 1.0f, 1.0f);
         }
         return EMPTY_STRING_LIST;
     }
