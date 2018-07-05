@@ -37,6 +37,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.PluginManager;
@@ -221,7 +222,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener
             default:
                 shouldSort = false;
         }
-        if (shouldSort && shouldSort(event.getClickedInventory()))
+        if (shouldSort && shouldSort(viewToClickedInventory(event.getView(), event.getRawSlot())))
         {
             final SortingMethod sortMethod2 = sortMethod;
             Bukkit.getScheduler().runTask(this, new Runnable()
@@ -233,6 +234,12 @@ public class ClickSortPlugin extends JavaPlugin implements Listener
                 }
             });
         }
+    }
+    
+    private Inventory viewToClickedInventory(InventoryView view, int rawSlot)
+    {
+        return rawSlot < 0 ? null
+                : (view.getTopInventory() != null && rawSlot < view.getTopInventory().getSize() ? view.getTopInventory() : view.getBottomInventory());
     }
     
     private boolean shouldSort(Inventory clickedInventory)

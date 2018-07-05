@@ -15,10 +15,10 @@ import org.bukkit.material.SpawnEgg;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
- * ±¾µØ»¯¹¤¾ßÀà
+ * ï¿½ï¿½ï¿½Ø»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
  *
- * @since 2015Äê12ÔÂ14ÈÕ ÏÂÎç1:33:52
- * @author ß÷¡áÎØ
+ * @since 2015ï¿½ï¿½12ï¿½ï¿½14ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½1:33:52
+ * @author ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
  */
 public class LocalUtil {
     public static FileConfiguration config;
@@ -27,26 +27,26 @@ public class LocalUtil {
     public static Logger log = ClickSortPlugin.getInstance().getLogger();
 
     /**
-     * »ñÈ¡ÎïÆ·ÍêÕûºº»¯Ãû³Æ(°üÀ¨Ô­°æ)
+     * ï¿½ï¿½È¡ï¿½ï¿½Æ·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½Ô­ï¿½ï¿½)
      *
      * @param i
-     *            ÎïÆ·ÊµÌå
-     * @return ÎïÆ·Ãû³Æ
+     *            ï¿½ï¿½Æ·Êµï¿½ï¿½
+     * @return ï¿½ï¿½Æ·ï¿½ï¿½ï¿½ï¿½
      */
     public static final String getItemFullName(final ItemStack i) {
         final String name = getItemName(getItemType(i));
         if (i.hasItemMeta() && i.getItemMeta().hasDisplayName()) {
-            return name + "¡ìr(" + i.getItemMeta().getDisplayName() + "¡ìr)";
+            return name + "ï¿½ï¿½r(" + i.getItemMeta().getDisplayName() + "ï¿½ï¿½r)";
         }
         return name;
     }
 
     /**
-     * »ñÈ¡ÎïÆ·ºº»¯Ãû³Æ
+     * ï¿½ï¿½È¡ï¿½ï¿½Æ·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
      *
      * @param i
-     *            ÎïÆ·ÊµÌå
-     * @return ÎïÆ·Ãû³Æ
+     *            ï¿½ï¿½Æ·Êµï¿½ï¿½
+     * @return ï¿½ï¿½Æ·ï¿½ï¿½ï¿½ï¿½
      */
     public static final String getItemName(final ItemStack i) {
         if (i.hasItemMeta() && i.getItemMeta().hasDisplayName()) {
@@ -56,11 +56,11 @@ public class LocalUtil {
     }
 
     /**
-     * »ñÈ¡ÎïÆ·ºº»¯Ãû³Æ
+     * ï¿½ï¿½È¡ï¿½ï¿½Æ·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
      *
      * @param iname
-     *            ÎïÆ·ÀàÐÍÃû³Æ
-     * @return ÎïÆ·Ãû³Æ
+     *            ï¿½ï¿½Æ·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+     * @return ï¿½ï¿½Æ·ï¿½ï¿½ï¿½ï¿½
      */
     public static final String getItemName(final String iname) {
         if (config == null) {
@@ -83,11 +83,11 @@ public class LocalUtil {
     }
 
     /**
-     * »ñÈ¡ÎïÆ·ÀàÐÍÃû³Æ
+     * ï¿½ï¿½È¡ï¿½ï¿½Æ·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
      *
      * @param i
-     *            ÎïÆ·ÊµÌå
-     * @return ÎïÆ·ÀàÐÍ
+     *            ï¿½ï¿½Æ·Êµï¿½ï¿½
+     * @return ï¿½ï¿½Æ·ï¿½ï¿½ï¿½ï¿½
      */
     @SuppressWarnings("deprecation")
     public static final String getItemType(final ItemStack i) {
@@ -103,10 +103,10 @@ public class LocalUtil {
     }
 
     /**
-     * ³õÊ¼»¯LocalUtil
+     * ï¿½ï¿½Ê¼ï¿½ï¿½LocalUtil
      *
      * @param plugin
-     *            ²å¼þÊµÌå
+     *            ï¿½ï¿½ï¿½Êµï¿½ï¿½
      */
     public static void init(final JavaPlugin plugin) {
         log = plugin.getLogger();
@@ -122,16 +122,16 @@ public class LocalUtil {
     }
 
     /**
-     * ³õÊ¼»¯¼ì²â
+     * ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½
      *
-     * @return ÊÇ·ñÍê³É
+     * @return ï¿½Ç·ï¿½ï¿½ï¿½ï¿½
      */
     public static boolean isInit() {
         return config != null;
     }
 
     /**
-     * ÖØÔØLocalUtil
+     * ï¿½ï¿½ï¿½ï¿½LocalUtil
      */
     public static void reload(final JavaPlugin plugin) {
         plugin.getServer().getScheduler().runTaskAsynchronously(plugin, new Runnable() {
