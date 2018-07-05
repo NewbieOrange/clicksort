@@ -9,5 +9,5 @@ defaults:
   click_mode: MIDDLE
   sort_mode: ID
   shift_click: true
-player_sort_min: 12
+player_sort_min: 9
 player_sort_max: 36
