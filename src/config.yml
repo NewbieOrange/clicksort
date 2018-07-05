@@ -1,4 +1,4 @@
-# See http://dev.bukkit.org/projects/clicksort/pages/configuration
+# See https://dev.bukkit.org/projects/clicksort/pages/configuration
 autosave_seconds: 300
 debug_level: 0
 drop_excess: true
