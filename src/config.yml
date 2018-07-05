@@ -1,4 +1,4 @@
-# See http://dev.bukkit.org/server-mods/clicksort/pages/configuration
+# See http://dev.bukkit.org/projects/clicksort/pages/configuration
 autosave_seconds: 300
 debug_level: 0
 drop_excess: true
@@ -9,3 +9,5 @@ defaults:
   click_mode: MIDDLE
   sort_mode: ID
   shift_click: true
+player_sort_min: 12
+player_sort_max: 36

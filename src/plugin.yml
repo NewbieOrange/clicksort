@@ -1,7 +1,7 @@
 name: ClickSort
 main: me.desht.clicksort.ClickSortPlugin
 authors: [ desht, chengzi368 ]
-version: 1.3.3
+version: 1.3.4
 description: Super-convenient inventory sorting
 website: http://dev.bukkit.org/bukkit-plugins/clicksort
 softdepend: [ Essentials, StackableItems ]
@@ -41,5 +41,18 @@ permissions:
     description: Allow use of the /clicksort shiftclick command
     default: true
   clicksort.sort:
-    description: Allow inventory to be click-sorted
+    description: Allow all kinds of inventories to be click-sorted
+    default: true
+    children:
+      clicksort.sort.hotbar: true
+      clicksort.sort.player: true
+      clicksort.sort.container: true
+  clicksort.sort.hotbar:
+    description: Allow hotbar to be click-sorted
+    default: true
+  clicksort.sort.player:
+    description: Allow player inventory (excluding hotbar) to be click-sorted
+    default: true
+  clicksort.sort.container:
+    description: Allow container to be click-sorted
     default: true
