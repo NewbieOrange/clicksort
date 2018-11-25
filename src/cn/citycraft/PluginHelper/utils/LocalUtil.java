@@ -14,40 +14,20 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.SpawnEgg;
 import org.bukkit.plugin.java.JavaPlugin;
 
-/**
- * ���ػ�������
- *
- * @since 2015��12��14�� ����1:33:52
- * @author ������
- */
 public class LocalUtil {
     public static FileConfiguration config;
     public static File file;
     private static String CONFIG_NAME = "items.yml";
     public static Logger log = ClickSortPlugin.getInstance().getLogger();
 
-    /**
-     * ��ȡ��Ʒ������������(����ԭ��)
-     *
-     * @param i
-     *            ��Ʒʵ��
-     * @return ��Ʒ����
-     */
     public static final String getItemFullName(final ItemStack i) {
         final String name = getItemName(getItemType(i));
         if (i.hasItemMeta() && i.getItemMeta().hasDisplayName()) {
-            return name + "��r(" + i.getItemMeta().getDisplayName() + "��r)";
+            return name + " (" + i.getItemMeta().getDisplayName() + ")";
         }
         return name;
     }
 
-    /**
-     * ��ȡ��Ʒ��������
-     *
-     * @param i
-     *            ��Ʒʵ��
-     * @return ��Ʒ����
-     */
     public static final String getItemName(final ItemStack i) {
         if (i.hasItemMeta() && i.getItemMeta().hasDisplayName()) {
             return i.getItemMeta().getDisplayName();
@@ -55,13 +35,6 @@ public class LocalUtil {
         return getItemName(getItemType(i));
     }
 
-    /**
-     * ��ȡ��Ʒ��������
-     *
-     * @param iname
-     *            ��Ʒ��������
-     * @return ��Ʒ����
-     */
     public static final String getItemName(final String iname) {
         if (config == null) {
             return iname;
@@ -81,14 +54,7 @@ public class LocalUtil {
         }
         return aname;
     }
-
-    /**
-     * ��ȡ��Ʒ��������
-     *
-     * @param i
-     *            ��Ʒʵ��
-     * @return ��Ʒ����
-     */
+    
     @SuppressWarnings("deprecation")
     public static final String getItemType(final ItemStack i) {
         String name = i.getType().name();
@@ -102,12 +68,6 @@ public class LocalUtil {
         return (name + (dura.isEmpty() ? "" : "-" + dura)).toUpperCase();
     }
 
-    /**
-     * ��ʼ��LocalUtil
-     *
-     * @param plugin
-     *            ���ʵ��
-     */
     public static void init(final JavaPlugin plugin) {
         log = plugin.getLogger();
         if (config == null) {
@@ -121,18 +81,10 @@ public class LocalUtil {
         }
     }
 
-    /**
-     * ��ʼ�����
-     *
-     * @return �Ƿ����
-     */
     public static boolean isInit() {
         return config != null;
     }
 
-    /**
-     * ����LocalUtil
-     */
     public static void reload(final JavaPlugin plugin) {
         plugin.getServer().getScheduler().runTaskAsynchronously(plugin, new Runnable() {
             @Override

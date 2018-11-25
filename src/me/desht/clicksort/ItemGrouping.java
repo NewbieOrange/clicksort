@@ -53,7 +53,6 @@ public class ItemGrouping
         }
     }
     
-    @SuppressWarnings("deprecation")
     private void addMapping(String matName, String grpName)
     {
         if (matName.matches("^\\d+-\\d+$"))
@@ -69,8 +68,7 @@ public class ItemGrouping
             }
             for (int i = v0; i <= v1; i++)
             {
-                // noinspection deprecation
-                addMapping(new MaterialData(i), grpName);
+                addMapping(new MaterialData(Material.getMaterial(i)), grpName);
             }
         }
         else
@@ -122,14 +120,12 @@ public class ItemGrouping
         return mat.getItemType().getMaxDurability() > 0;
     }
     
-    @SuppressWarnings("deprecation")
     private MaterialData parseMaterial(String s)
     {
         String[] f = s.split(":");
         Material mat;
         if (StringUtils.isNumeric(f[0]))
         {
-            // noinspection deprecation
             mat = Material.getMaterial(Integer.parseInt(f[0]));
         }
         else

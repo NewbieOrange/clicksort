@@ -52,7 +52,7 @@ public enum SortingMethod
         {
             case ID:
                 // noinspection deprecation
-                return String.format("%04d", stack.getTypeId());
+                return String.format("%04d", stack.getType().getId());
             case NAME:
                 String name = ItemNames.lookup(stack);
                 return name == null ? null : name.replaceAll("\u00a7.", "");
@@ -60,7 +60,7 @@ public enum SortingMethod
                 plugin = ClickSortPlugin.getInstance();
                 String grp = plugin.getItemGrouping().getGroup(stack);
                 // noinspection deprecation
-                return String.format("%s-%04d", grp, stack.getTypeId());
+                return String.format("%s-%04d", grp, stack.getType().getId());
             case VALUE:
                 plugin = ClickSortPlugin.getInstance();
                 double value = plugin.getItemValues().getValue(stack);

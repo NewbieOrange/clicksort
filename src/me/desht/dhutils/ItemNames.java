@@ -326,15 +326,15 @@ public class ItemNames
         }
         
         String result;
-        String key = Integer.toString(stack.getTypeId());
+        String key = Integer.toString(stack.getType().getId());
         Material mat = stack.getType();
-        if ((mat == Material.WOOL || mat == Material.CARPET)
+        if ((mat.name().endsWith("WOOL") || mat.name().endsWith("CARPET"))
                 && stack.getDurability() == 0)
         {
             // special case: white wool/carpet is just called "Wool" or "Carpet"
             result = map.get(key);
         }
-        else if (mat == Material.WOOL || mat == Material.CARPET
+        else if (mat.name().endsWith("WOOL") || mat.name().endsWith("CARPET")
                 || mat == Material.STAINED_CLAY || mat == Material.STAINED_GLASS
                 || mat == Material.STAINED_GLASS_PANE)
         {
