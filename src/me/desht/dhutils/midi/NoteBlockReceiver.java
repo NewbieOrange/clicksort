@@ -66,12 +66,12 @@ public class NoteBlockReceiver implements Receiver
         
         if (globalLoc != null)
         {
-            globalLoc.getWorld().playSound(globalLoc, Sound.BLOCK_NOTE_PLING, volume, pitch);
+            globalLoc.getWorld().playSound(globalLoc, Sound.BLOCK_NOTE_BLOCK_PLING, volume, pitch);
         }
         else if (listeners != null)
         {
             for (Player player : listeners)
-                player.playSound(player.getLocation(), Sound.BLOCK_NOTE_PLING, volume, pitch);
+                player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, volume, pitch);
         }
     }
     

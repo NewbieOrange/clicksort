@@ -4,7 +4,6 @@ import me.desht.dhutils.Debugger;
 import me.desht.dhutils.JARUtil;
 import me.desht.dhutils.LogUtils;
 
-import org.apache.commons.lang.StringUtils;
 import org.bukkit.Material;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -55,26 +54,7 @@ public class ItemGrouping
     
     private void addMapping(String matName, String grpName)
     {
-        if (matName.matches("^\\d+-\\d+$"))
-        {
-            String[] fields = matName.split("-");
-            int v0 = Integer.parseInt(fields[0]);
-            int v1 = Integer.parseInt(fields[1]);
-            if (v0 > v1)
-            {
-                int tmp = v1;
-                v1 = v0;
-                v0 = tmp;
-            }
-            for (int i = v0; i <= v1; i++)
-            {
-                addMapping(new MaterialData(Material.getMaterial(i)), grpName);
-            }
-        }
-        else
-        {
-            addMapping(parseMaterial(matName), grpName);
-        }
+        addMapping(parseMaterial(matName), grpName);
     }
     
     private void addMapping(MaterialData mat, String grpName)
@@ -123,15 +103,7 @@ public class ItemGrouping
     private MaterialData parseMaterial(String s)
     {
         String[] f = s.split(":");
-        Material mat;
-        if (StringUtils.isNumeric(f[0]))
-        {
-            mat = Material.getMaterial(Integer.parseInt(f[0]));
-        }
-        else
-        {
-            mat = Material.matchMaterial(f[0]);
-        }
+        Material mat = Material.matchMaterial(f[0]);
         short dur = f.length == 2 ? Short.parseShort(f[1]) : 0;
         return new ItemStack(mat, 1, dur).getData();
     }

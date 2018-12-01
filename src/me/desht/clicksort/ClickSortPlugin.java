@@ -108,6 +108,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener
         {
             saveTask.cancel();
         }
+        LocalUtil.save();
         
         instance = null;
     }
@@ -471,12 +472,15 @@ public class ClickSortPlugin extends JavaPlugin implements Listener
             Material mat = sortKey.getMaterial();
             int maxStack = mat.getMaxStackSize();
             Debugger.getInstance().debug(2, "max stack size for " + mat + " = " + maxStack);
-            while (amount > maxStack)
+            if (maxStack != 0)
             {
-                res.add(sortKey.toItemStack(maxStack));
-                amount -= maxStack;
+                while (amount > maxStack)
+                {
+                    res.add(sortKey.toItemStack(maxStack));
+                    amount -= maxStack;
+                }
+                res.add(sortKey.toItemStack(amount));
             }
-            res.add(sortKey.toItemStack(amount));
         }
         
         while (res.size() < nItems)

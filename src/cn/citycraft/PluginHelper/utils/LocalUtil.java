@@ -43,14 +43,6 @@ public class LocalUtil {
         if (aname == null) {
             aname = iname;
             config.set(iname, iname);
-            try
-            {
-                config.save(file);
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
         }
         return aname;
     }
@@ -59,7 +51,7 @@ public class LocalUtil {
     public static final String getItemType(final ItemStack i) {
         String name = i.getType().name();
         String dura = "";
-        if (i.getType() == Material.MONSTER_EGG) {
+        if (i.getType().name().endsWith("_EGG")) {
             name = ((SpawnEgg) i.getData()).getSpawnedType().name();
         } else {
             final int dur = i.getDurability();
@@ -90,9 +82,18 @@ public class LocalUtil {
             @Override
             public void run() {
                 new JARUtil(plugin).extractResource(CONFIG_NAME, plugin.getDataFolder());
-                config = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), CONFIG_NAME));
+                config = YamlConfiguration.loadConfiguration(file = new File(plugin.getDataFolder(), CONFIG_NAME));
             }
         });
     }
 
+    
+    public static void save() {
+        try {
+            config.save(file);
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }
