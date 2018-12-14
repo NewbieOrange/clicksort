@@ -67,7 +67,7 @@ public class LocalUtil {
                 @Override
                 public void run() {
                     new JARUtil(plugin).extractResource(CONFIG_NAME, plugin.getDataFolder());
-                    config = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), CONFIG_NAME));
+                    config = YamlConfiguration.loadConfiguration(file = new File(plugin.getDataFolder(), CONFIG_NAME));
                 }
             });
         }
