@@ -189,8 +189,8 @@ public class PlayerSortingPrefs
             {
                 LogUtils.warning("invalid sort method "
                         + plugin.getConfig().getString("defaults.sort_mode")
-                        + " - default to ID");
-                sortMethod = SortingMethod.ID;
+                        + " - default to NAME");
+                sortMethod = SortingMethod.NAME;
             }
             try
             {
