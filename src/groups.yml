@@ -15,10 +15,10 @@
 # See also the 'default_group_name' setting in config.yml for how to define
 # a default group for any items not listed here.
 #
-010-tools: [ 256-258, 269-271, 273-275, 277-279, 284-286, 290-294, 259, 346, 398 ]
-020-weapons: [ 267, 268, 272, 276, 283, 261 ]
-030-armour: [ 298-317 ]
-040-ores: [ 14, 15, 16, 21, 56, 73, 129, 153 ]
-050-gems: [ 264, '351:4', 388, '397:0' ]
-060-ingots: [ 265, 266 ]
-070-food: [ 260, 282, 297, 319, 320, 335, 349, 350, 354, 357, 363-366, 391-394, 409, 421-423 ]
+010-tools: [ wooden_shovel, wooden_pickaxe, wooden_axe, stone_shovel, stone_pickaxe, stone_axe, iron_shovel, iron_pickaxe, iron_axe, golden_shovel, golden_pickaxe, golden_axe, diamond_shovel, diamond_pickaxe, diamond_axe, flint_and_steel, fishing_rod, carrot_on_a_stick ]
+020-weapons: [ wooden_sword, stone_sword, iron_sword, golden_sword, diamond_sword, bow ]
+030-armour: [ leather_helmet, leather_chestplate, leather_leggings, leather_boots, chainmail_helmet, chainmail_chestplate, chainmail_leggings, chainmail_boots, iron_helmet, iron_chestplate, iron_leggings, iron_boots, golden_helmet, golden_chestplate, golden_leggings, golden_boots, diamond_helmet, diamond_chestplate, diamond_leggings, diamond_boots ]
+040-ores: [ iron_ore, gold_ore, coal_ore, lapis_ore, diamond_ore, redstone_ore, emerald_ore, nether_quartz_ore ]
+050-gems: [ diamond, lapis_lazuli, emerald ]
+060-ingots: [ iron_ingot, gold_ingot ]
+070-food: [ apple, mushroom_stew, bread, porkchop, cooked_porkchop, golden_apple, cookie, melon, beef, cooked_beef, chicken, cooked_chicken, glistering_melon_slice, carrot, potato, baked_potato, golden_carrot, pumpkin_pie, rabbit, cooked_rabbit, rabbit_stew, chorus_fruit, beetroot, cake ]
