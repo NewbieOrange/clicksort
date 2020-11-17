@@ -22,6 +22,7 @@ import me.desht.clicksort.commands.*;
 import me.desht.dhutils.*;
 import me.desht.dhutils.commands.CommandManager;
 
+import org.bstats.bukkit.MetricsLite;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -43,7 +44,6 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
-import org.mcstats.MetricsLite;
 
 import cn.citycraft.PluginHelper.utils.LocalUtil;
 
@@ -287,15 +287,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener
     
     private void setupMetrics()
     {
-        try
-        {
-            MetricsLite metrics = new MetricsLite(this);
-            metrics.start();
-        }
-        catch (IOException e)
-        {
-            LogUtils.warning("Couldn't submit metrics stats: " + e.getMessage());
-        }
+        MetricsLite metrics = new MetricsLite(this, 9432);
     }
     
     /**

@@ -7,7 +7,6 @@ import java.util.logging.Logger;
 import me.desht.clicksort.ClickSortPlugin;
 import me.desht.dhutils.JARUtil;
 
-import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
