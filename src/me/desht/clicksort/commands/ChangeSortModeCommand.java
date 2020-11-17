@@ -6,6 +6,7 @@ import me.desht.clicksort.ClickSortPlugin;
 import me.desht.clicksort.LanguageLoader;
 import me.desht.clicksort.PlayerSortingPrefs;
 import me.desht.clicksort.SortingMethod;
+import me.desht.dhutils.CompatUtil;
 import me.desht.dhutils.DHValidate;
 import me.desht.dhutils.MiscUtil;
 import me.desht.dhutils.commands.AbstractCommand;
@@ -21,7 +22,11 @@ public class ChangeSortModeCommand extends AbstractCommand
     {
         super("clicksort sort", 1, 1);
         setPermissionNode("clicksort.commands.sort");
-        setUsage("/clicksort sort <id|name|group|value>");
+        if (CompatUtil.isMaterialIdAllowed()) {
+            setUsage("/clicksort sort <id|name|group|value>");
+        } else {
+            setUsage("/clicksort sort <name|group|value>");
+        }
     }
     
     @Override

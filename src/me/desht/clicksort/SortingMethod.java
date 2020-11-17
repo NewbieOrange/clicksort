@@ -1,5 +1,6 @@
 package me.desht.clicksort;
 
+import me.desht.dhutils.CompatUtil;
 import me.desht.dhutils.ItemNames;
 
 import org.bukkit.inventory.ItemStack;
@@ -35,6 +36,8 @@ public enum SortingMethod
     {
         switch (this)
         {
+            case ID:
+                return CompatUtil.isMaterialIdAllowed();
             case GROUP:
                 return ClickSortPlugin.getInstance().getItemGrouping().isAvailable();
             case VALUE:
