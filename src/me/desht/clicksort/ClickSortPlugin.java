@@ -2,13 +2,13 @@ package me.desht.clicksort;
 
 /*
  * This file is part of ClickSort
- * 
+ *
  * ClickSort is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any later version.
- * 
+ *
  * ClickSort is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License along with ClickSort. If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import me.desht.clicksort.commands.*;
 import me.desht.dhutils.*;
@@ -26,8 +27,6 @@ import org.bstats.bukkit.MetricsLite;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.block.Chest;
-import org.bukkit.block.DoubleChest;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.HumanEntity;
@@ -37,10 +36,10 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
@@ -55,51 +54,52 @@ public class ClickSortPlugin extends JavaPlugin implements Listener
     private BukkitTask saveTask;
     private ItemGrouping itemGroups;
     private ItemValues itemValues;
-    
+    private List<InventoryType> sortableInventories;
+
     private static ClickSortPlugin instance = null;
-    
+
     @Override
     public void onEnable()
     {
         instance = this;
-        
+
         LogUtils.init(this);
         LanguageLoader.init(this);
-        
+
         PluginManager pm = this.getServer().getPluginManager();
         pm.registerEvents(this, this);
-        
+
         getConfig().options().header("See http://dev.bukkit.org/projects/clicksort/pages/configuration");
         getConfig().options().copyDefaults(true);
         getConfig().set("log_level", null); // superseded by debug_level
         saveConfig();
-        
+
         Debugger.getInstance().setPrefix("[ClickSort] ");
         Debugger.getInstance().setLevel(getConfig().getInt("debug_level"));
         Debugger.getInstance().setTarget(getServer().getConsoleSender());
-        
+
         cmds.registerCommand(new ChangeClickModeCommand());
         cmds.registerCommand(new ChangeSortModeCommand());
         cmds.registerCommand(new DebugCommand());
         cmds.registerCommand(new GetcfgCommand());
         cmds.registerCommand(new ReloadCommand());
         cmds.registerCommand(new ShiftClickCommand());
-        
+
         sortingPrefs = new PlayerSortingPrefs(this);
         sortingPrefs.load();
-        
+
         itemGroups = new ItemGrouping(this);
         itemGroups.load();
         itemValues = new ItemValues(this);
         itemValues.load();
-        
+
         LocalUtil.init(this);
-        
+
         processConfig();
-        
+
         setupMetrics();
     }
-    
+
     @Override
     public void onDisable()
     {
@@ -109,20 +109,20 @@ public class ClickSortPlugin extends JavaPlugin implements Listener
             saveTask.cancel();
         }
         LocalUtil.save();
-        
+
         instance = null;
     }
-    
+
     public static ClickSortPlugin getInstance()
     {
         return instance;
     }
-    
+
     public CooldownMessager getMessager()
     {
         return messager;
     }
-    
+
     /**
      * @return the sorting
      */
@@ -130,17 +130,17 @@ public class ClickSortPlugin extends JavaPlugin implements Listener
     {
         return sortingPrefs;
     }
-    
+
     public ItemGrouping getItemGrouping()
     {
         return itemGroups;
     }
-    
+
     public ItemValues getItemValues()
     {
         return itemValues;
     }
-    
+
     /**
      * Inventory click handler. Run with priority HIGHEST - this makes it run late, giving protection plugins a chance to cancel the inventory click
      * event first.
@@ -164,16 +164,16 @@ public class ClickSortPlugin extends JavaPlugin implements Listener
         {
             return;
         }
-        
+
         String playerName = player.getName();
-        
+
         Debugger.getInstance().debug(
                 "inventory click by player " + playerName + ": type=" + event.getClick() + " slot=" + event.getSlot() + " rawslot=" + event.getRawSlot());
-        
+
         SortingMethod sortMethod = sortingPrefs.getSortingMethod(player);
         ClickMethod clickMethod = sortingPrefs.getClickMethod(player);
         boolean allowShiftClick = sortingPrefs.getShiftClickAllowed(player);
-        
+
         if (event.getCurrentItem().getType() == Material.AIR && event.isShiftClick() && allowShiftClick)
         {
             if (event.isLeftClick() && clickMethod != ClickMethod.NONE)
@@ -206,7 +206,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener
             }
             return;
         }
-        
+
         boolean shouldSort;
         switch (clickMethod)
         {
@@ -236,26 +236,18 @@ public class ClickSortPlugin extends JavaPlugin implements Listener
             });
         }
     }
-    
+
     private Inventory viewToClickedInventory(InventoryView view, int rawSlot)
     {
         return rawSlot < 0 ? null
                 : (view.getTopInventory() != null && rawSlot < view.getTopInventory().getSize() ? view.getTopInventory() : view.getBottomInventory());
     }
-    
+
     private boolean shouldSort(Inventory clickedInventory)
     {
-        if (clickedInventory instanceof PlayerInventory)
-        {
-            return true;
-        }
-        else if (clickedInventory.getHolder() instanceof Chest || clickedInventory.getHolder() instanceof DoubleChest)
-        {
-            return true;
-        }
-        return false;
+        return sortableInventories.contains(clickedInventory.getType());
     }
-    
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args)
     {
@@ -269,27 +261,30 @@ public class ClickSortPlugin extends JavaPlugin implements Listener
             return true;
         }
     }
-    
+
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args)
     {
         return cmds.onTabComplete(sender, command, label, args);
     }
-    
+
     public void processConfig()
     {
         setupSaveTask();
-        
+
         MiscUtil.setColouredConsole(getConfig().getBoolean("coloured_console"));
-        
+
         Debugger.getInstance().setLevel(getConfig().getInt("debug_level"));
+
+        sortableInventories = getConfig().getStringList("sortable_inventories").stream()
+                .map(InventoryType::valueOf).collect(Collectors.toList());
     }
-    
+
     private void setupMetrics()
     {
         MetricsLite metrics = new MetricsLite(this, 9432);
     }
-    
+
     /**
      * Save player sorting data periodically if necessary
      */
@@ -300,11 +295,11 @@ public class ClickSortPlugin extends JavaPlugin implements Listener
             saveTask.cancel();
             saveTask = null;
         }
-        
+
         int period = getConfig().getInt("autosave_seconds");
         if (period <= 0)
             return;
-        
+
         saveTask = getServer().getScheduler().runTaskTimer(this, new Runnable()
         {
             @Override
@@ -314,13 +309,13 @@ public class ClickSortPlugin extends JavaPlugin implements Listener
             }
         }, 0L, 20L * period);
     }
-    
+
     private void sortInventory(final InventoryClickEvent event, final SortingMethod sortMethod)
     {
         Player p = (Player) event.getWhoClicked();
         int rawSlot = event.getRawSlot();
         int slot = event.getView().convertSlot(rawSlot);
-        
+
         Inventory inv;
         if (slot == rawSlot)
         {
@@ -341,7 +336,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener
             // lower inv was clicked
             inv = event.getView().getBottomInventory();
         }
-        
+
         Debugger.getInstance().debug("clicked inventory window " + inv.getType() + ", slot " + slot);
         int min, max; // slot range to sort
         switch (inv.getType())
@@ -384,24 +379,24 @@ public class ClickSortPlugin extends JavaPlugin implements Listener
             default:
                 return;
         }
-        
+
         ItemStack[] items = inv.getContents();
         List<ItemStack> sortedItems = sortAndMerge(items, min, max, sortMethod);
-        
+
         int nItems = max - min;
-        
+
         if (nItems < sortedItems.size() && !getConfig().getBoolean("drop_excess"))
         {
             MiscUtil.errorMessage(p, LanguageLoader.getColoredMessage("invOverFlow"));
             return;
         }
-        
+
         for (int i = 0; i < nItems && i < sortedItems.size(); i++)
         {
             ItemStack is = sortedItems.get(i);
             inv.setItem(min + i, is);
         }
-        
+
         if (nItems < sortedItems.size())
         {
             // This *shouldn't* happen, but there is a possibility if some other
@@ -415,7 +410,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener
                 p.getWorld().dropItemNaturally(p.getLocation(), sortedItems.get(i));
             }
         }
-        
+
         for (HumanEntity he : event.getViewers())
         {
             if (he instanceof Player)
@@ -424,12 +419,12 @@ public class ClickSortPlugin extends JavaPlugin implements Listener
             }
         }
     }
-    
+
     private List<ItemStack> sortAndMerge(ItemStack[] items, int min, int max, SortingMethod sortMethod)
     {
         List<ItemStack> res = new ArrayList<ItemStack>(max - min);
         Map<SortKey, Integer> amounts = new HashMap<SortKey, Integer>();
-        
+
         // phase 1: extract a list of unique material/data/item-meta strings and
         // use those as keys
         // into a hash which maps items to quantities
@@ -451,10 +446,10 @@ public class ClickSortPlugin extends JavaPlugin implements Listener
                 }
             }
         }
-        
+
         // Sanity check
         checkNoNulls(amounts, items);
-        
+
         // phase 2: sort the extracted item keys and reconstruct the item stacks
         // from those keys
         for (SortKey sortKey : MiscUtil.asSortedList(amounts.keySet()))
@@ -474,15 +469,15 @@ public class ClickSortPlugin extends JavaPlugin implements Listener
                 res.add(sortKey.toItemStack(amount));
             }
         }
-        
+
         while (res.size() < nItems)
         {
             res.add(null);
         }
-        
+
         return res;
     }
-    
+
     private void checkNoNulls(Map<SortKey, Integer> amounts, ItemStack[] items)
     {
         for (SortKey key : amounts.keySet())
