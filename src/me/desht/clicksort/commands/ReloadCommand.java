@@ -17,6 +17,7 @@ package me.desht.clicksort.commands;
  along with ClickSort.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import cn.citycraft.PluginHelper.utils.LocalUtil;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 
@@ -44,6 +45,7 @@ public class ReloadCommand extends AbstractCommand
         csPlugin.getItemGrouping().load();
         csPlugin.getItemValues().load();
         LanguageLoader.reload();
+        LocalUtil.reload(plugin);
         MiscUtil.statusMessage(sender, LanguageLoader.getColoredMessage("configReloaded"));
         
         return true;

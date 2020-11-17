@@ -11,7 +11,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.SpawnEgg;
-import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.plugin.Plugin;
 
 public class LocalUtil {
     public static FileConfiguration config;
@@ -59,7 +59,7 @@ public class LocalUtil {
         return (name + (dura.isEmpty() ? "" : "-" + dura)).toUpperCase();
     }
 
-    public static void init(final JavaPlugin plugin) {
+    public static void init(final Plugin plugin) {
         log = plugin.getLogger();
         if (config == null) {
             plugin.getServer().getScheduler().runTaskAsynchronously(plugin, new Runnable() {
@@ -76,7 +76,7 @@ public class LocalUtil {
         return config != null;
     }
 
-    public static void reload(final JavaPlugin plugin) {
+    public static void reload(final Plugin plugin) {
         plugin.getServer().getScheduler().runTaskAsynchronously(plugin, new Runnable() {
             @Override
             public void run() {
