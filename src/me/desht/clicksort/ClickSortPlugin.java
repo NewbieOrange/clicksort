@@ -13,10 +13,7 @@ package me.desht.clicksort;
  */
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import me.desht.clicksort.commands.*;
@@ -277,7 +274,13 @@ public class ClickSortPlugin extends JavaPlugin implements Listener
         Debugger.getInstance().setLevel(getConfig().getInt("debug_level"));
 
         sortableInventories = getConfig().getStringList("sortable_inventories").stream()
-                .map(InventoryType::valueOf).collect(Collectors.toList());
+                .map(s -> {
+                    try {
+                        return InventoryType.valueOf(s);
+                    } catch (IllegalArgumentException e) {
+                        return null;
+                    }
+                }).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     private void setupMetrics()
