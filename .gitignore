@@ -18,6 +18,7 @@
 # various other potential build files
 /build
 /bin
+/classes
 /dist
 /manifest.mf
 
