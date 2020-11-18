@@ -1,4 +1,4 @@
-package org.bstats.bukkit;
+package me.desht.clicksort;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;

@@ -12,7 +12,6 @@ package me.desht.clicksort;
  * You should have received a copy of the GNU General Public License along with ClickSort. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -20,7 +19,6 @@ import me.desht.clicksort.commands.*;
 import me.desht.dhutils.*;
 import me.desht.dhutils.commands.CommandManager;
 
-import org.bstats.bukkit.MetricsLite;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
