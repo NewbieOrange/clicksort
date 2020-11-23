@@ -370,6 +370,8 @@ public class ClickSortPlugin extends JavaPlugin implements Listener
             case HOPPER:
             case DROPPER:
             case ENDER_CHEST:
+            case BARREL:
+            case SHULKER_BOX:
                 if (!PermissionUtils.isAllowedTo(p, "clicksort.sort.container"))
                 {
                     return;
