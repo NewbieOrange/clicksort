@@ -16,3 +16,4 @@ sortable_inventories:
   - "CHEST"
   - "ENDER_CHEST"
   - "SHULKER_BOX"
+  - "BARREL"
