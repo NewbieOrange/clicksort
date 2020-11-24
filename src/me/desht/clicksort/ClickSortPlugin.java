@@ -340,45 +340,32 @@ public class ClickSortPlugin extends JavaPlugin implements Listener
 
         Debugger.getInstance().debug("clicked inventory window " + inv.getType() + ", slot " + slot);
         int min, max; // slot range to sort
-        switch (inv.getType())
-        {
-            case PLAYER:
-                if (slot < 9)
-                {
-                    // hotbar
-                    if (!PermissionUtils.isAllowedTo(p, "clicksort.sort.hotbar"))
-                    {
-                        return;
-                    }
-                    min = 0;
-                    max = 9;
-                }
-                else
-                {
-                    if (!PermissionUtils.isAllowedTo(p, "clicksort.sort.player"))
-                    {
-                        return;
-                    }
-                    // main player inventory
-                    min = getConfig().getInt("player_sort_min");
-                    // don't sort equipments and off-hand
-                    max = getConfig().getInt("player_sort_max");
-                }
-                break;
-            case CHEST:
-            case DISPENSER:
-            case HOPPER:
-            case DROPPER:
-            case ENDER_CHEST:
-                if (!PermissionUtils.isAllowedTo(p, "clicksort.sort.container"))
-                {
+        InventoryType type = inv.getType();
+        if (type == InventoryType.PLAYER) {
+            if (slot < 9) {
+                // hotbar
+                if (!PermissionUtils.isAllowedTo(p, "clicksort.sort.hotbar")) {
                     return;
                 }
                 min = 0;
-                max = inv.getSize();
-                break;
-            default:
+                max = 9;
+            } else {
+                if (!PermissionUtils.isAllowedTo(p, "clicksort.sort.player")) {
+                    return;
+                }
+                // main player inventory
+                min = getConfig().getInt("player_sort_min");
+                // don't sort equipments and off-hand
+                max = getConfig().getInt("player_sort_max");
+            }
+        } else if (sortableInventories.contains(type)) {
+            if (!PermissionUtils.isAllowedTo(p, "clicksort.sort.container")) {
                 return;
+            }
+            min = 0;
+            max = inv.getSize();
+        } else {
+            return;
         }
 
         ItemStack[] items = inv.getContents();
