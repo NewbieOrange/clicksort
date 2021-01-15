@@ -8,7 +8,6 @@ import org.bukkit.Material;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
 
 import java.io.File;
 import java.util.HashMap;
@@ -16,7 +15,7 @@ import java.util.Map;
 
 public class ItemGrouping
 {
-    private static final String mapFile = "groups.yml";
+    private static final String MAP_FILE = "groups.yml";
     
     private final ClickSortPlugin plugin;
     private final Map<String, String> mapping;
@@ -26,12 +25,12 @@ public class ItemGrouping
         this.mapping = new HashMap<String, String>();
         this.plugin = plugin;
         
-        new JARUtil(plugin).extractResource(mapFile, plugin.getDataFolder());
+        new JARUtil(plugin).extractResource(MAP_FILE, plugin.getDataFolder());
     }
     
     public void load()
     {
-        File map = new File(plugin.getDataFolder(), mapFile);
+        File map = new File(plugin.getDataFolder(), MAP_FILE);
         Configuration cfg = YamlConfiguration.loadConfiguration(map);
         
         mapping.clear();
@@ -45,8 +44,7 @@ public class ItemGrouping
                 }
                 catch (IllegalArgumentException e)
                 {
-                    LogUtils.warning("Unknown material name '" + matName + "' in group '"
-                            + grpName + "'");
+                    LogUtils.warning("Unknown material name '" + matName + "' in group '" + grpName + "'");
                 }
             }
         }
@@ -57,20 +55,20 @@ public class ItemGrouping
         addMapping(parseMaterial(matName), grpName);
     }
     
-    private void addMapping(MaterialData mat, String grpName)
+    private void addMapping(Material material, String grpName)
     {
-        if (mat == null)
+        if (material == null)
         {
             throw new IllegalArgumentException();
         }
-        String key = getKey(mat);
-        mapping.put(getKey(mat), grpName);
+        String key = getKey(material);
+        mapping.put(key, grpName);
         Debugger.getInstance().debug(2, "addMapping: " + key + " = " + grpName);
     }
     
     public String getGroup(ItemStack stack)
     {
-        String group = mapping.get(getKey(stack.getData()));
+        String group = mapping.get(getKey(stack.getType()));
         if (group == null)
         {
             group = plugin.getConfig().getString("default_group_name", "000-default");
@@ -84,27 +82,13 @@ public class ItemGrouping
         return !mapping.isEmpty();
     }
     
-    private String getKey(MaterialData mat)
+    private String getKey(Material material)
     {
-        // Items with durability should not use the current damage level as part
-        // of
-        // grouping criteria. Items which don't have durability *should* use the
-        // data
-        // value, e.g. 351:4 is lapis, which could be considered either a dye or
-        // a gem
-        return hasDurability(mat) ? mat.getItemType().toString() : mat.toString();
+        return material.toString();
     }
-    
-    private boolean hasDurability(MaterialData mat)
+
+    private Material parseMaterial(String name)
     {
-        return mat.getItemType().getMaxDurability() > 0;
-    }
-    
-    private MaterialData parseMaterial(String s)
-    {
-        String[] f = s.split(":");
-        Material mat = Material.matchMaterial(f[0]);
-        short dur = f.length == 2 ? Short.parseShort(f[1]) : 0;
-        return new ItemStack(mat, 1, dur).getData();
+        return Material.matchMaterial(name);
     }
 }
