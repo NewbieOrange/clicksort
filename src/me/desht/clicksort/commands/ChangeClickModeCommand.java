@@ -1,35 +1,30 @@
 package me.desht.clicksort.commands;
 
-import java.util.List;
-
 import me.desht.clicksort.ClickMethod;
 import me.desht.clicksort.ClickSortPlugin;
 import me.desht.clicksort.LanguageLoader;
 import me.desht.clicksort.PlayerSortingPrefs;
 import me.desht.dhutils.MiscUtil;
 import me.desht.dhutils.commands.AbstractCommand;
-
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
-public class ChangeClickModeCommand extends AbstractCommand
-{
-    
-    public ChangeClickModeCommand()
-    {
+import java.util.List;
+
+public class ChangeClickModeCommand extends AbstractCommand {
+
+    public ChangeClickModeCommand() {
         super("clicksort click", 1, 1);
         setPermissionNode("clicksort.commands.click");
         setUsage("/clicksort click <single|double|none>");
     }
-    
+
     @Override
-    public boolean execute(Plugin plugin, CommandSender sender, String[] args)
-    {
+    public boolean execute(Plugin plugin, CommandSender sender, String[] args) {
         notFromConsole(sender);
-        
-        try
-        {
+
+        try {
             PlayerSortingPrefs prefs = ((ClickSortPlugin) plugin).getSortingPrefs();
             ClickMethod clickMethod = ClickMethod.valueOf(args[0].toUpperCase());
             prefs.setClickMethod((Player) sender, clickMethod);
@@ -37,24 +32,18 @@ public class ChangeClickModeCommand extends AbstractCommand
                     sender,
                     LanguageLoader.getColoredMessage("setClickMethodTo").replace(
                             "%method%", clickMethod.toString()));
-        }
-        catch (IllegalArgumentException e)
-        {
+        } catch (IllegalArgumentException e) {
             showUsage(sender);
         }
-        
+
         return true;
     }
-    
+
     @Override
-    public List<String> onTabComplete(Plugin plugin, CommandSender sender, String[] args)
-    {
-        if (args.length == 1)
-        {
+    public List<String> onTabComplete(Plugin plugin, CommandSender sender, String[] args) {
+        if (args.length == 1) {
             return getEnumCompletions(sender, ClickMethod.class, args[0]);
-        }
-        else
-        {
+        } else {
             return noCompletions(sender);
         }
     }

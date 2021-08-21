@@ -2,7 +2,6 @@ package me.desht.clicksort;
 
 import me.desht.dhutils.CompatUtil;
 import me.desht.dhutils.ItemNames;
-
 import org.bukkit.inventory.ItemStack;
 
 /*
@@ -22,20 +21,16 @@ import org.bukkit.inventory.ItemStack;
  along with ClickSort.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-public enum SortingMethod
-{
+public enum SortingMethod {
     ID, NAME, GROUP, VALUE;
-    
-    public SortingMethod next()
-    {
+
+    public SortingMethod next() {
         int o = (ordinal() + 1) % values().length;
         return values()[o];
     }
-    
-    public boolean isAvailable()
-    {
-        switch (this)
-        {
+
+    public boolean isAvailable() {
+        switch (this) {
             case ID:
                 return CompatUtil.isMaterialIdAllowed();
             case GROUP:
@@ -46,13 +41,11 @@ public enum SortingMethod
                 return true;
         }
     }
-    
+
     @SuppressWarnings("deprecation")
-    public String makeSortPrefix(ItemStack stack)
-    {
+    public String makeSortPrefix(ItemStack stack) {
         ClickSortPlugin plugin;
-        switch (this)
-        {
+        switch (this) {
             case ID:
                 // noinspection deprecation
                 return String.format("%04d", stack.getType().getId());

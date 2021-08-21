@@ -1,19 +1,15 @@
 package me.desht.clicksort;
 
-public enum ClickMethod
-{
+public enum ClickMethod {
     MIDDLE, DOUBLE, SINGLE, NONE;
-    
-    public ClickMethod next()
-    {
+
+    public ClickMethod next() {
         int o = (ordinal() + 1) % values().length;
         return values()[o];
     }
-    
-    public String getInstruction()
-    {
-        switch (this)
-        {
+
+    public String getInstruction() {
+        switch (this) {
             case SINGLE:
                 return LanguageLoader.getMessage("instructionSingle");
             case DOUBLE:

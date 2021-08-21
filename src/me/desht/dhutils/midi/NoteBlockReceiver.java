@@ -1,5 +1,9 @@
 package me.desht.dhutils.midi;
 
+import org.bukkit.Location;
+import org.bukkit.Sound;
+import org.bukkit.entity.Player;
+
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MidiMessage;
 import javax.sound.midi.Receiver;
@@ -7,77 +11,64 @@ import javax.sound.midi.ShortMessage;
 import java.io.IOException;
 import java.util.Set;
 
-import org.bukkit.Location;
-import org.bukkit.Sound;
-import org.bukkit.entity.Player;
-
 /**
  * Midi Receiver for processing note events.
  *
  * @author authorblues
  */
-public class NoteBlockReceiver implements Receiver
-{
+public class NoteBlockReceiver implements Receiver {
     private static final float VOLUME_RANGE = 10.0f;
-    
+
     private final Set<Player> listeners;
     private final Location globalLoc;
-    
+
     public NoteBlockReceiver(Set<Player> listeners) throws InvalidMidiDataException,
-            IOException
-    {
+            IOException {
         this.listeners = listeners;
         this.globalLoc = null;
     }
-    
-    public NoteBlockReceiver(Location loc) throws InvalidMidiDataException, IOException
-    {
+
+    public NoteBlockReceiver(Location loc) throws InvalidMidiDataException, IOException {
         this.listeners = null;
         this.globalLoc = loc;
     }
-    
+
     @Override
-    public void send(MidiMessage m, long time)
-    {
-        if (m instanceof ShortMessage)
-        {
+    public void send(MidiMessage m, long time) {
+        if (m instanceof ShortMessage) {
             ShortMessage smessage = (ShortMessage) m;
-            switch (smessage.getCommand())
-            {
+            switch (smessage.getCommand()) {
                 case ShortMessage.NOTE_ON:
                     this.playNote(smessage);
                     break;
-                
+
                 case ShortMessage.NOTE_OFF:
                     break;
             }
         }
     }
-    
-    public void playNote(ShortMessage message)
-    {
+
+    public void playNote(ShortMessage message) {
         // if this isn't a NOTE_ON message, we can't play it
-        if (ShortMessage.NOTE_ON != message.getCommand())
+        if (ShortMessage.NOTE_ON != message.getCommand()) {
             return;
-        
+        }
+
         // get pitch and volume from the midi message
         float pitch = (float) ToneUtil.midiToPitch(message);
         float volume = VOLUME_RANGE * (message.getData2() / 127.0f);
-        
-        if (globalLoc != null)
-        {
+
+        if (globalLoc != null) {
             globalLoc.getWorld().playSound(globalLoc, Sound.BLOCK_NOTE_BLOCK_PLING, volume, pitch);
-        }
-        else if (listeners != null)
-        {
-            for (Player player : listeners)
+        } else if (listeners != null) {
+            for (Player player : listeners) {
                 player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, volume, pitch);
+            }
         }
     }
-    
+
     @Override
-    public void close()
-    {
+    public void close() {
         listeners.clear();
     }
 }

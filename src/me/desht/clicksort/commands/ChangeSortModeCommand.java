@@ -1,7 +1,5 @@
 package me.desht.clicksort.commands;
 
-import java.util.List;
-
 import me.desht.clicksort.ClickSortPlugin;
 import me.desht.clicksort.LanguageLoader;
 import me.desht.clicksort.PlayerSortingPrefs;
@@ -10,16 +8,15 @@ import me.desht.dhutils.CompatUtil;
 import me.desht.dhutils.DHValidate;
 import me.desht.dhutils.MiscUtil;
 import me.desht.dhutils.commands.AbstractCommand;
-
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
-public class ChangeSortModeCommand extends AbstractCommand
-{
-    
-    public ChangeSortModeCommand()
-    {
+import java.util.List;
+
+public class ChangeSortModeCommand extends AbstractCommand {
+
+    public ChangeSortModeCommand() {
         super("clicksort sort", 1, 1);
         setPermissionNode("clicksort.commands.sort");
         if (CompatUtil.isMaterialIdAllowed()) {
@@ -28,14 +25,12 @@ public class ChangeSortModeCommand extends AbstractCommand
             setUsage("/clicksort sort <name|group|value>");
         }
     }
-    
+
     @Override
-    public boolean execute(Plugin plugin, CommandSender sender, String[] args)
-    {
+    public boolean execute(Plugin plugin, CommandSender sender, String[] args) {
         notFromConsole(sender);
-        
-        try
-        {
+
+        try {
             PlayerSortingPrefs prefs = ((ClickSortPlugin) plugin).getSortingPrefs();
             SortingMethod sortMethod = SortingMethod.valueOf(args[0].toUpperCase());
             DHValidate.isTrue(sortMethod.isAvailable(),
@@ -46,24 +41,18 @@ public class ChangeSortModeCommand extends AbstractCommand
                     sender,
                     LanguageLoader.getColoredMessage("setSortingMethodTo").replace(
                             "%method%", sortMethod.toString()));
-        }
-        catch (IllegalArgumentException e)
-        {
+        } catch (IllegalArgumentException e) {
             showUsage(sender);
         }
-        
+
         return true;
     }
-    
+
     @Override
-    public List<String> onTabComplete(Plugin plugin, CommandSender sender, String[] args)
-    {
-        if (args.length == 1)
-        {
+    public List<String> onTabComplete(Plugin plugin, CommandSender sender, String[] args) {
+        if (args.length == 1) {
             return getEnumCompletions(sender, SortingMethod.class, args[0]);
-        }
-        else
-        {
+        } else {
             return noCompletions(sender);
         }
     }

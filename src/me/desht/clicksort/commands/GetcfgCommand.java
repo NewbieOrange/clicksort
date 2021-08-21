@@ -23,24 +23,19 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 
-public class GetcfgCommand extends AbstractCommand
-{
-    public GetcfgCommand()
-    {
+public class GetcfgCommand extends AbstractCommand {
+    public GetcfgCommand() {
         super("clicksort getcfg");
         setPermissionNode("clicksort.commands.getcfg");
         setUsage("/<command> getcfg");
     }
-    
+
     @Override
-    public boolean execute(Plugin plugin, CommandSender commandSender, String[] strings)
-    {
+    public boolean execute(Plugin plugin, CommandSender commandSender, String[] strings) {
         MessagePager pager = MessagePager.getPager(commandSender).clear()
                 .setParseColours(true);
-        for (String key : plugin.getConfig().getKeys(true))
-        {
-            if (!plugin.getConfig().isConfigurationSection(key))
-            {
+        for (String key : plugin.getConfig().getKeys(true)) {
+            if (!plugin.getConfig().isConfigurationSection(key)) {
                 pager.add(ChatColor.WHITE + key + " = " + ChatColor.YELLOW
                         + plugin.getConfig().get(key));
             }

@@ -3,52 +3,42 @@ package me.desht.dhutils;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.ItemMeta;
-
-import cn.citycraft.PluginHelper.utils.LocalUtil;
+import xyz.chengzi.clicksort.util.LocalUtil;
 
 /**
  * Class to get the displayed name (as the client shows) for an item.
  */
-public class ItemNames
-{
+public class ItemNames {
     /**
      * Given an item stack, return a friendly printable name for the item, as
      * the (English-language) vanilla Minecraft client would display it.
      *
-     * @param stack
-     *            the item stack
+     * @param stack the item stack
      * @return a friendly printable name for the item
      */
-    public static String lookup(ItemStack stack)
-    {
-        if (stack.hasItemMeta())
-        {
+    public static String lookup(ItemStack stack) {
+        if (stack.hasItemMeta()) {
             ItemMeta meta = stack.getItemMeta();
-            if (meta.getDisplayName() != null)
-            {
+            if (meta instanceof BookMeta) {
+                return ((BookMeta) meta).getTitle();
+            } else {
                 return meta.getDisplayName();
             }
-            else if (meta instanceof BookMeta)
-            {
-                return ((BookMeta) meta).getTitle();
-            }
         }
-        
-        return LocalUtil.getItemName(stack);
+
+        return LocalUtil.getItemFullName(stack);
     }
-    
+
     /**
      * Given an item stack return a friendly name for the item, in the form
      * "{amount} x {item-name}" where {amount} is the number of items in the
      * stack and {item-name} is the return value of
      * {@link #lookup(org.bukkit.inventory.ItemStack)} .
      *
-     * @param stack
-     *            the item stack
+     * @param stack the item stack
      * @return a friendly printable name for the item, with amount information
      */
-    public static String lookupWithAmount(ItemStack stack)
-    {
+    public static String lookupWithAmount(ItemStack stack) {
         String s = lookup(stack);
         return stack.getAmount() + " x " + s;
     }
