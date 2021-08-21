@@ -42,6 +42,7 @@ import java.util.stream.Collectors;
 public class ClickSortPlugin extends JavaPlugin implements Listener {
     private final CommandManager cmds = new CommandManager(this);
     private final CooldownMessager messager = new CooldownMessager();
+    private final Metrics metrics = new Metrics(this, 9432);
     private PlayerSortingPrefs sortingPrefs;
     private BukkitTask saveTask;
     private ItemGrouping itemGroups;
@@ -87,8 +88,6 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
         LocalUtil.init(this);
 
         processConfig();
-
-        setupMetrics();
     }
 
     @Override
@@ -251,10 +250,6 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
                         return null;
                     }
                 }).filter(Objects::nonNull).collect(Collectors.toList());
-    }
-
-    private void setupMetrics() {
-        MetricsLite metrics = new MetricsLite(this, 9432);
     }
 
     /**
