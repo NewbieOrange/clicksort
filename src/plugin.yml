@@ -1,6 +1,6 @@
 name: ClickSort
 main: me.desht.clicksort.ClickSortPlugin
-authors: [ desht, chengzi368 ]
+authors: [ desht, chengzi ]
 version: 1.4.4
 description: Super-convenient inventory sorting
 website: https://dev.bukkit.org/projects/clicksort
