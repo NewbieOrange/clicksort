@@ -15,7 +15,6 @@ package me.desht.clicksort;
 import me.desht.clicksort.commands.*;
 import me.desht.dhutils.*;
 import me.desht.dhutils.commands.CommandManager;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -61,7 +60,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
         PluginManager pm = this.getServer().getPluginManager();
         pm.registerEvents(this, this);
 
-        getConfig().options().header("See http://dev.bukkit.org/projects/clicksort/pages/configuration");
+        getConfig().options().header("See https://dev.bukkit.org/projects/clicksort/pages/configuration");
         getConfig().options().copyDefaults(true);
         getConfig().set("log_level", null); // superseded by debug_level
         saveConfig();
@@ -155,8 +154,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 
         if (event.getCurrentItem().getType() == Material.AIR && event.isShiftClick() && allowShiftClick) {
             if (event.isLeftClick() && clickMethod != ClickMethod.NONE) {
-                // shift-left-clicking an empty slot cycles sort method for the
-                // player
+                // shift-left-clicking an empty slot cycles sort method for the player
                 do {
                     sortMethod = sortMethod.next();
                 }
@@ -169,8 +167,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
                 messager.message(player, "leftclick", 60, ChatColor.GRAY + ChatColor.ITALIC.toString() + LanguageLoader
                         .getColoredMessage("shiftLeftToChange"));
             } else if (event.isRightClick()) {
-                // shift-right-clicking an empty slot cycles click method for
-                // the player
+                // shift-right-clicking an empty slot cycles click method for the player
                 clickMethod = clickMethod.next();
                 sortingPrefs.setClickMethod(player, clickMethod);
                 MiscUtil.statusMessage(player, clickMethod.getInstruction());
@@ -200,24 +197,20 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
                 shouldSort = false;
         }
         if (shouldSort && shouldSort(viewToClickedInventory(event.getView(), event.getRawSlot()))) {
-            final SortingMethod sortMethod2 = sortMethod;
-            Bukkit.getScheduler().runTask(this, new Runnable() {
-                @Override
-                public void run() {
-                    sortInventory(event, sortMethod2);
-                }
-            });
+//            final SortingMethod sortMethod2 = sortMethod;
+//            Bukkit.getScheduler().runTask(this, () -> sortInventory(event, sortMethod2));
+            sortInventory(event, sortMethod);
         }
     }
 
     private Inventory viewToClickedInventory(InventoryView view, int rawSlot) {
         return rawSlot < 0 ? null
-                : (view.getTopInventory() != null && rawSlot < view.getTopInventory().getSize() ? view.getTopInventory()
+                : (rawSlot < view.getTopInventory().getSize() ? view.getTopInventory()
                         : view.getBottomInventory());
     }
 
     private boolean shouldSort(Inventory clickedInventory) {
-        return sortableInventories.contains(clickedInventory.getType());
+        return clickedInventory != null && sortableInventories.contains(clickedInventory.getType());
     }
 
     @Override
@@ -266,12 +259,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
             return;
         }
 
-        saveTask = getServer().getScheduler().runTaskTimer(this, new Runnable() {
-            @Override
-            public void run() {
-                sortingPrefs.autosave();
-            }
-        }, 0L, 20L * period);
+        saveTask = getServer().getScheduler().runTaskTimer(this, () -> sortingPrefs.autosave(), 0L, 20L * period);
     }
 
     private void sortInventory(final InventoryClickEvent event, final SortingMethod sortMethod) {
@@ -336,16 +324,14 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
             return;
         }
 
-        for (int i = 0; i < nItems && i < sortedItems.size(); i++) {
+        for (int i = 0; i < Math.min(nItems, sortedItems.size()); i++) {
             ItemStack is = sortedItems.get(i);
             inv.setItem(min + i, is);
         }
 
         if (nItems < sortedItems.size()) {
-            // This *shouldn't* happen, but there is a possibility if some other
-            // plugin has been messing
-            // with max stack sizes, and we end up with an overflowing inventory
-            // after merging stacks.
+            // This *shouldn't* happen, but there is a possibility if some other plugin has been messing
+            // with max stack sizes, and we end up with an overflowing inventory after merging stacks.
             MiscUtil.alertMessage(p, LanguageLoader.getColoredMessage("dropItems"));
             for (int i = nItems; i < sortedItems.size(); i++) {
                 Debugger.getInstance().debug("dropping " + sortedItems.get(i) + " by player " + p.getName());
@@ -416,7 +402,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
                     LogUtils.severe(item.toString());
                 }
                 LogUtils.severe(
-                        "Please report this, quoting all above error text, in a ticket at http://dev.bukkit.org/server-mods/clicksort/tickets/");
+                        "Please report this, quoting all above error text, in a ticket at https://github.com/NewbieOrange/clicksort/issues/");
             }
         }
     }
