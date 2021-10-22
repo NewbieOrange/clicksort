@@ -210,7 +210,8 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
     }
 
     private boolean shouldSort(Inventory clickedInventory) {
-        return clickedInventory != null && sortableInventories.contains(clickedInventory.getType());
+        return clickedInventory != null && (clickedInventory.getHolder() != null || !getConfig().getBoolean(
+                "ignore_plugin_inventory")) && sortableInventories.contains(clickedInventory.getType());
     }
 
     @Override

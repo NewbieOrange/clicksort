@@ -3,6 +3,7 @@ autosave_seconds: 300
 debug_level: 0
 drop_excess: true
 default_group_name: '000-default'
+ignore_plugin_inventory: false
 use_essentials_worth: true
 coloured_console: true
 defaults:
