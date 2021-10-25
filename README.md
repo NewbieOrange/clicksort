@@ -22,3 +22,7 @@ Detailed documentation is available at bukkitdev: http://dev.bukkit.org/bukkit-p
 ## License
 
 Clicksort by Des Herriott is licensed under the [Gnu GPL v3](http://www.gnu.org/licenses/gpl-3.0.html).
+
+## JetBrains Toolkit
+
+This project is developed with Intellij IDEA Ultimate from JetBrains! https://jb.gg/OpenSource
