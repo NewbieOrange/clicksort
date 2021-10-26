@@ -28,6 +28,7 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginManager;
@@ -144,9 +145,8 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 
         String playerName = player.getName();
 
-        Debugger.getInstance().debug(
-                "inventory click by player " + playerName + ": type=" + event.getClick() + " slot=" + event.getSlot()
-                        + " rawslot=" + event.getRawSlot());
+        Debugger.getInstance().debug("inventory click by player " + playerName + ": type=" + event.getClick() + " slot="
+                + event.getSlot() + " rawslot=" + event.getRawSlot());
 
         SortingMethod sortMethod = sortingPrefs.getSortingMethod(player);
         ClickMethod clickMethod = sortingPrefs.getClickMethod(player);
@@ -157,23 +157,22 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
                 // shift-left-clicking an empty slot cycles sort method for the player
                 do {
                     sortMethod = sortMethod.next();
-                }
-                while (!sortMethod.isAvailable());
+                } while (!sortMethod.isAvailable());
                 sortingPrefs.setSortingMethod(player, sortMethod);
                 MiscUtil.statusMessage(player,
                         LanguageLoader.getColoredMessage("sortBy").replace("%method%", sortMethod.toString())
-                                .replace("%instruction%",
-                                        clickMethod.getInstruction()));
-                messager.message(player, "leftclick", 60, ChatColor.GRAY + ChatColor.ITALIC.toString() + LanguageLoader
-                        .getColoredMessage("shiftLeftToChange"));
+                                .replace("%instruction%", clickMethod.getInstruction()));
+                messager.message(player, "leftclick", 60,
+                        ChatColor.GRAY + ChatColor.ITALIC.toString() + LanguageLoader.getColoredMessage(
+                                "shiftLeftToChange"));
             } else if (event.isRightClick()) {
                 // shift-right-clicking an empty slot cycles click method for the player
                 clickMethod = clickMethod.next();
                 sortingPrefs.setClickMethod(player, clickMethod);
                 MiscUtil.statusMessage(player, clickMethod.getInstruction());
                 messager.message(player, "rightclick", 60,
-                        ChatColor.GRAY + ChatColor.ITALIC.toString() + LanguageLoader
-                                .getColoredMessage("shiftRightToChange"));
+                        ChatColor.GRAY + ChatColor.ITALIC.toString() + LanguageLoader.getColoredMessage(
+                                "shiftRightToChange"));
             }
             if (getConfig().getInt("autosave_seconds") == 0) {
                 sortingPrefs.save();
@@ -205,13 +204,17 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 
     private Inventory viewToClickedInventory(InventoryView view, int rawSlot) {
         return rawSlot < 0 ? null
-                : (rawSlot < view.getTopInventory().getSize() ? view.getTopInventory()
-                        : view.getBottomInventory());
+                : (rawSlot < view.getTopInventory().getSize() ? view.getTopInventory() : view.getBottomInventory());
     }
 
     private boolean shouldSort(Inventory clickedInventory) {
-        return clickedInventory != null && (clickedInventory.getHolder() != null || !getConfig().getBoolean(
-                "ignore_plugin_inventory")) && sortableInventories.contains(clickedInventory.getType());
+        return clickedInventory != null && (!getConfig().getBoolean("ignore_plugin_inventory")
+                || isVanillaInventoryHolder(clickedInventory.getHolder()))
+                && sortableInventories.contains(clickedInventory.getType());
+    }
+
+    private static boolean isVanillaInventoryHolder(InventoryHolder inventoryHolder) {
+        return inventoryHolder != null && inventoryHolder.getClass().getPackageName().startsWith("org.bukkit");
     }
 
     @Override
@@ -236,14 +239,13 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 
         Debugger.getInstance().setLevel(getConfig().getInt("debug_level"));
 
-        sortableInventories = getConfig().getStringList("sortable_inventories").stream()
-                .map(s -> {
-                    try {
-                        return InventoryType.valueOf(s);
-                    } catch (IllegalArgumentException e) {
-                        return null;
-                    }
-                }).filter(Objects::nonNull).collect(Collectors.toList());
+        sortableInventories = getConfig().getStringList("sortable_inventories").stream().map(s -> {
+            try {
+                return InventoryType.valueOf(s);
+            } catch (IllegalArgumentException e) {
+                return null;
+            }
+        }).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     /**
