@@ -13,8 +13,10 @@ package me.desht.clicksort;
  */
 
 import me.desht.clicksort.commands.*;
+import me.desht.clicksort.events.InventorySortEvent;
 import me.desht.dhutils.*;
 import me.desht.dhutils.commands.CommandManager;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -196,9 +198,11 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
                 shouldSort = false;
         }
         if (shouldSort && shouldSort(viewToClickedInventory(event.getView(), event.getRawSlot()))) {
-//            final SortingMethod sortMethod2 = sortMethod;
-//            Bukkit.getScheduler().runTask(this, () -> sortInventory(event, sortMethod2));
-            sortInventory(event, sortMethod);
+            InventorySortEvent sortEvent = new InventorySortEvent(event.getView());
+            Bukkit.getPluginManager().callEvent(sortEvent);
+            if (!sortEvent.isCancelled()) {
+                sortInventory(event, sortMethod);
+            }
         }
     }
 
