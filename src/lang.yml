@@ -1,6 +1,7 @@
 setClickMethodTo: "Click method has been set to: %method%"
 setSortingMethodTo: "Sorting method has been set to: %method%"
 sortingMethodNotAvailable: "Sorting method %method% is not available."
+clickMethodNotAvailable: "Click method %method% is not available."
 setDebugLevelTo: "Debug level is now %level%"
 invaildDebugLevel: "Invalid debug level: %level%"
 configReloaded: "The configurations of ClickSort has been reloaded."
