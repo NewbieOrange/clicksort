@@ -169,7 +169,9 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
                                 "shiftLeftToChange"));
             } else if (event.isRightClick()) {
                 // shift-right-clicking an empty slot cycles click method for the player
-                clickMethod = clickMethod.next();
+                do {
+                    clickMethod = clickMethod.next();
+                } while (!clickMethod.isAvailable());
                 sortingPrefs.setClickMethod(player, clickMethod);
                 MiscUtil.statusMessage(player, clickMethod.getInstruction());
                 messager.message(player, "rightclick", 60,
@@ -182,21 +184,14 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
             return;
         }
 
-        boolean shouldSort;
-        switch (clickMethod) {
-            case SINGLE:
-                shouldSort = event.getClick() == ClickType.LEFT && event.getCurrentItem().getType() == Material.AIR
-                        && event.getCursor().getType() == Material.AIR;
-                break;
-            case DOUBLE:
-                shouldSort = event.getClick() == ClickType.DOUBLE_CLICK;
-                break;
-            case MIDDLE:
-                shouldSort = event.getClick() == ClickType.MIDDLE;
-                break;
-            default:
-                shouldSort = false;
-        }
+        boolean shouldSort = switch (clickMethod) {
+            case SINGLE -> event.getClick() == ClickType.LEFT && event.getCurrentItem().getType() == Material.AIR
+                    && (event.getCursor() == null || event.getCursor().getType() == Material.AIR);
+            case DOUBLE -> event.getClick() == ClickType.DOUBLE_CLICK;
+            case MIDDLE -> event.getClick() == ClickType.MIDDLE;
+            case SWAP -> event.getClick() == ClickType.SWAP_OFFHAND;
+            default -> false;
+        };
         if (shouldSort && shouldSort(viewToClickedInventory(event.getView(), event.getRawSlot()))) {
             InventorySortEvent sortEvent = new InventorySortEvent(event.getView());
             Bukkit.getPluginManager().callEvent(sortEvent);

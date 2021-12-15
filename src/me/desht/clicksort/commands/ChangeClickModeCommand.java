@@ -4,6 +4,7 @@ import me.desht.clicksort.ClickMethod;
 import me.desht.clicksort.ClickSortPlugin;
 import me.desht.clicksort.LanguageLoader;
 import me.desht.clicksort.PlayerSortingPrefs;
+import me.desht.dhutils.CompatUtil;
 import me.desht.dhutils.MiscUtil;
 import me.desht.dhutils.commands.AbstractCommand;
 import org.bukkit.command.CommandSender;
@@ -17,7 +18,14 @@ public class ChangeClickModeCommand extends AbstractCommand {
     public ChangeClickModeCommand() {
         super("clicksort click", 1, 1);
         setPermissionNode("clicksort.commands.click");
-        setUsage("/clicksort click <single|double|none>");
+        String usage = "/clicksort click <single|double";
+        if (CompatUtil.isMiddleClickAllowed()) {
+            usage += "|middle";
+        }
+        if (CompatUtil.isSwapKeyAvailable()) {
+            usage += "|swap";
+        }
+        setUsage(usage + "|none>");
     }
 
     @Override
