@@ -100,8 +100,7 @@ public class CommandManager {
                                       String label, String[] args) {
         Debugger.getInstance().debug(
                 "tab complete: sender=" + sender.getName() + ", cmd=" + command.getName()
-                        + ", label=" + label + ", args=[" + Joiner.on(",").join(args)
-                        + "]");
+                        + ", label=" + label + ", args=[" + Joiner.on(",").join(args) + "]");
 
         List<AbstractCommand> possibleMatches = getPossibleMatches(command.getName(),
                 args, true);

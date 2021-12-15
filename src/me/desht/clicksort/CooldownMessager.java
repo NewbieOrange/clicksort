@@ -11,7 +11,7 @@ public class CooldownMessager {
 
     public void message(CommandSender sender, String cooldown, int secs, String message) {
         long last = getLast(sender, cooldown);
-        if (System.currentTimeMillis() - last > secs * 1000) {
+        if (System.currentTimeMillis() - last > secs * 1000L) {
             MiscUtil.statusMessage(sender, message);
             cooldowns.put(sender.getName() + "." + cooldown, System.currentTimeMillis());
         }

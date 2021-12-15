@@ -30,35 +30,24 @@ public enum SortingMethod {
     }
 
     public boolean isAvailable() {
-        switch (this) {
-            case ID:
-                return CompatUtil.isMaterialIdAllowed();
-            case GROUP:
-                return ClickSortPlugin.getInstance().getItemGrouping().isAvailable();
-            case VALUE:
-                return ClickSortPlugin.getInstance().getItemValues().isAvailable();
-            default:
-                return true;
-        }
+        return switch (this) {
+            case ID -> CompatUtil.isMaterialIdAllowed();
+            case GROUP -> ClickSortPlugin.getInstance().getItemGrouping().isAvailable();
+            case VALUE -> ClickSortPlugin.getInstance().getItemValues().isAvailable();
+            default -> true;
+        };
     }
 
-    @SuppressWarnings("deprecation")
     public String makeSortPrefix(ItemStack stack) {
-        ClickSortPlugin plugin;
         switch (this) {
-            case ID:
-                // noinspection deprecation
-                return String.format("%04d", stack.getType().getId());
             case NAME:
                 String name = ItemNames.lookup(stack);
                 return name == null ? null : name.replaceAll("\u00a7.", "");
             case GROUP:
-                plugin = ClickSortPlugin.getInstance();
-                String grp = plugin.getItemGrouping().getGroup(stack);
+                String grp = ClickSortPlugin.getInstance().getItemGrouping().getGroup(stack);
                 return String.format("%s-%s", grp, stack.getType());
             case VALUE:
-                plugin = ClickSortPlugin.getInstance();
-                double value = plugin.getItemValues().getValue(stack);
+                double value = ClickSortPlugin.getInstance().getItemValues().getValue(stack);
                 return String.format("%08.2f", value);
             default:
                 return "";
