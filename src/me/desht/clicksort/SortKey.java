@@ -3,15 +3,17 @@ package me.desht.clicksort;
 import me.desht.dhutils.LogUtils;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 
 public class SortKey implements Comparable<SortKey> {
     private final String sortPrefix;
     private final Material material;
-    private final short durability;
+    private final int durability;
     private final String metaStr;
     private final ItemMeta meta;
 
@@ -25,7 +27,11 @@ public class SortKey implements Comparable<SortKey> {
             this.sortPrefix = prefix;
         }
         this.material = stack.getType();
-        this.durability = stack.getDurability();
+        if (stack.getItemMeta() instanceof Damageable damageable) {
+            this.durability = damageable.getDamage();
+        } else {
+            this.durability = 0;
+        }
         this.meta = stack.getItemMeta();
         this.metaStr = makeMetaString();
     }
@@ -47,7 +53,7 @@ public class SortKey implements Comparable<SortKey> {
     /**
      * @return the durability
      */
-    public short getDurability() {
+    public int getDurability() {
         return durability;
     }
 
@@ -59,7 +65,7 @@ public class SortKey implements Comparable<SortKey> {
     }
 
     public ItemStack toItemStack(int amount) {
-        ItemStack stack = new ItemStack(getMaterial(), amount, getDurability());
+        ItemStack stack = new ItemStack(getMaterial(), amount);
         stack.setItemMeta(meta);
         return stack;
     }
@@ -99,20 +105,8 @@ public class SortKey implements Comparable<SortKey> {
         }
 
         SortKey sortKey = (SortKey) o;
-
-        if (durability != sortKey.durability) {
-            return false;
-        }
-        if (material != sortKey.material) {
-            return false;
-        }
-        if (meta != null ? !meta.equals(sortKey.meta) : sortKey.meta != null) {
-            return false;
-        }
-        if (!metaStr.equals(sortKey.metaStr)) {
-            return false;
-        }
-        return sortPrefix.equals(sortKey.sortPrefix);
+        return durability == sortKey.durability && material == sortKey.material && Objects.equals(meta, sortKey.meta)
+                && metaStr.equals(sortKey.metaStr) && sortPrefix.equals(sortKey.sortPrefix);
     }
 
     @Override

@@ -9,6 +9,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.MemoryConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 
@@ -80,8 +81,12 @@ public class ItemValues {
         // check possible worth.yml from Essentials first
         if (essMap != null) {
             String s = mat.toString().replace("_", "").toLowerCase();
-            String s1 = s + "." + stack.getDurability();
-            val = essMap.getDouble(s1, essMap.getDouble(s, 0.0));
+            val = essMap.getDouble(s, 0.0);
+            if (stack.getItemMeta() instanceof Damageable damageable) {
+                String s1 = s + ".*";
+                String s2 = s + "." + damageable.getDamage();
+                val = essMap.getDouble(s2, essMap.getDouble(s1, val));
+            }
             Debugger.getInstance().debug(2, "Essentials worth.yml: " + s + " = " + val);
         }
 
@@ -90,9 +95,9 @@ public class ItemValues {
         String matName = mat.toString().toLowerCase();
         if (valueMap.contains(matName)) {
             val = valueMap.getDouble(matName);
-        } else {
+        } else if (stack.getItemMeta() instanceof Damageable damageable) {
             // this includes the data byte, e.g. "INK_SACK/4"
-            String s = matName + "/" + stack.getDurability();
+            String s = matName + "/" + damageable.getDamage();
             val = valueMap.getDouble(s, val);
         }
 
