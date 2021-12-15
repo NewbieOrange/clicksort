@@ -154,23 +154,19 @@ public class PlayerSortingPrefs {
         public boolean shiftClick;
 
         public SortPrefs() {
+            String defaultSortMode = plugin.getConfig().getString("defaults.sort_mode");
             try {
-                sortMethod = SortingMethod.valueOf(plugin.getConfig().getString(
-                        "defaults.sort_mode"));
+                sortMethod = SortingMethod.valueOf(defaultSortMode);
             } catch (IllegalArgumentException e) {
-                LogUtils.warning("invalid sort method "
-                        + plugin.getConfig().getString("defaults.sort_mode")
-                        + " - default to NAME");
+                LogUtils.warning("invalid sort method " + defaultSortMode + " - default to NAME");
                 sortMethod = SortingMethod.NAME;
             }
+            String defaultClickMethod = plugin.getConfig().getString("defaults.click_mode");
             try {
-                clickMethod = ClickMethod.valueOf(plugin.getConfig().getString(
-                        "defaults.click_mode"));
+                clickMethod = ClickMethod.valueOf(defaultClickMethod);
             } catch (IllegalArgumentException e) {
-                LogUtils.warning("invalid click method "
-                        + plugin.getConfig().getString("defaults.click_mode")
-                        + " - default to MIDDLE");
-                clickMethod = ClickMethod.MIDDLE;
+                LogUtils.warning("invalid click method " + defaultClickMethod + " - default to SWAP");
+                clickMethod = ClickMethod.SWAP;
             }
             shiftClick = plugin.getConfig().getBoolean("defaults.shift_click");
         }
