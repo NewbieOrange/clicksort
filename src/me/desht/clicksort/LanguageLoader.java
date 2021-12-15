@@ -37,9 +37,9 @@ public class LanguageLoader {
     public static void load() {
         config = YamlConfiguration.loadConfiguration(configFile);
         InputStream defaultConfigStream = plugin.getResource(FILE_NAME);
-        InputStreamReader configReader = new InputStreamReader(defaultConfigStream);
 
         if (defaultConfigStream != null) {
+            InputStreamReader configReader = new InputStreamReader(defaultConfigStream);
             YamlConfiguration defaultConfig = YamlConfiguration
                     .loadConfiguration(configReader);
             config.setDefaults(defaultConfig);
