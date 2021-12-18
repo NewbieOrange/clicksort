@@ -18,7 +18,7 @@ public class LocalUtil {
     public static File file;
     public static Logger log = ClickSortPlugin.getInstance().getLogger();
 
-    public static final String getItemFullName(final ItemStack i) {
+    public static String getItemFullName(final ItemStack i) {
         final String name = getItemName(getItemType(i));
         if (i.hasItemMeta() && i.getItemMeta().hasDisplayName()) {
             return name + " (" + i.getItemMeta().getDisplayName() + ")";
@@ -26,14 +26,14 @@ public class LocalUtil {
         return name;
     }
 
-    public static final String getItemName(final ItemStack i) {
+    public static String getItemName(final ItemStack i) {
         if (i.hasItemMeta() && i.getItemMeta().hasDisplayName()) {
             return i.getItemMeta().getDisplayName();
         }
         return getItemName(getItemType(i));
     }
 
-    public static final String getItemName(final String iname) {
+    public static String getItemName(final String iname) {
         if (config == null) {
             return iname;
         }
@@ -45,20 +45,15 @@ public class LocalUtil {
         return aname;
     }
 
-    public static final String getItemType(final ItemStack i) {
+    public static String getItemType(final ItemStack i) {
         return i.getType().name().toUpperCase(Locale.ROOT);
     }
 
     public static void init(final Plugin plugin) {
         log = plugin.getLogger();
         if (config == null) {
-            plugin.getServer().getScheduler().runTaskAsynchronously(plugin, new Runnable() {
-                @Override
-                public void run() {
-                    new JARUtil(plugin).extractResource(CONFIG_NAME, plugin.getDataFolder());
-                    config = YamlConfiguration.loadConfiguration(file = new File(plugin.getDataFolder(), CONFIG_NAME));
-                }
-            });
+            new JARUtil(plugin).extractResource(CONFIG_NAME, plugin.getDataFolder());
+            config = YamlConfiguration.loadConfiguration(file = new File(plugin.getDataFolder(), CONFIG_NAME));
         }
     }
 
@@ -67,18 +62,18 @@ public class LocalUtil {
     }
 
     public static void reload(final Plugin plugin) {
-        plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
-            new JARUtil(plugin).extractResource(CONFIG_NAME, plugin.getDataFolder());
-            config = YamlConfiguration.loadConfiguration(file = new File(plugin.getDataFolder(), CONFIG_NAME));
-        });
+        new JARUtil(plugin).extractResource(CONFIG_NAME, plugin.getDataFolder());
+        config = YamlConfiguration.loadConfiguration(file = new File(plugin.getDataFolder(), CONFIG_NAME));
     }
 
 
     public static void save() {
-        try {
-            config.save(file);
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (isInitialized()) {
+            try {
+                config.save(file);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
