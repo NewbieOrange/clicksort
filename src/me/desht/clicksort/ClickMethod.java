@@ -18,6 +18,10 @@ public enum ClickMethod {
         };
     }
 
+    public boolean shouldCancelEvent() {
+        return this == SWAP;
+    }
+
     public String getInstruction() {
         return switch (this) {
             case SINGLE -> LanguageLoader.getMessage("instructionSingle");

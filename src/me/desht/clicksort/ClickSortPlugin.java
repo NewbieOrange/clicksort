@@ -197,6 +197,9 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
             Bukkit.getPluginManager().callEvent(sortEvent);
             if (!sortEvent.isCancelled()) {
                 sortInventory(event, sortMethod);
+                if (clickMethod.shouldCancelEvent()) {
+                    event.setCancelled(true);
+                }
             }
         }
     }
