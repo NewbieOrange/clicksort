@@ -14,7 +14,7 @@ Copy ClickSort.jar into your plugins/ folder.  Restart/reload your server.  Done
 
 This should give you a copy of ClickSort.jar under your target directory.
 
-## Usage
+## Documentation
 
 Detailed documentation is available at bukkitdev: http://dev.bukkit.org/bukkit-plugins/clicksort/
 
