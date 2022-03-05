@@ -17,16 +17,10 @@ public class ItemNames {
      * @return a friendly printable name for the item
      */
     public static String lookup(ItemStack stack) {
-        if (stack.hasItemMeta()) {
-            ItemMeta meta = stack.getItemMeta();
-            if (meta instanceof BookMeta) {
-                return ((BookMeta) meta).getTitle();
-            } else {
-                return meta.getDisplayName();
-            }
+        if (stack.getItemMeta() instanceof BookMeta bookMeta) {
+            return bookMeta.getTitle();
         }
-
-        return LocalUtil.getItemFullName(stack);
+        return LocalUtil.getItemName(stack);
     }
 
     /**

@@ -1,0 +1,21 @@
+# See https://dev.bukkit.org/projects/clicksort/pages/configuration
+debug_level: 0
+drop_excess: true
+default_group_name: '000-default'
+ignore_plugin_inventory: false
+use_essentials_worth: true
+coloured_console: true
+defaults:
+  click_mode: SWAP
+  sort_mode: NAME
+  shift_click: true
+player_sort_min: 9
+player_sort_max: 36
+autopurge_seconds: 7200
+purge_after: 7d
+sortable_inventories:
+  - "PLAYER"
+  - "CHEST"
+  - "ENDER_CHEST"
+  - "SHULKER_BOX"
+  - "BARREL"
