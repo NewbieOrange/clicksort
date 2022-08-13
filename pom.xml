@@ -6,7 +6,7 @@
 
     <groupId>me.desht.clicksort</groupId>
     <artifactId>clicksort</artifactId>
-    <version>1.6.0</version>
+    <version>1.6.1</version>
 
     <properties>
         <maven.compiler.source>16</maven.compiler.source>
