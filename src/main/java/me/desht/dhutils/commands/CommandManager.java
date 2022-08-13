@@ -28,7 +28,7 @@ public class CommandManager {
     }
 
     public void registerAllCommands(String packageName) {
-        Package p = Package.getPackage(packageName);
+        Package p = getClass().getClassLoader().getDefinedPackage(packageName);
         if (p == null) {
             throw new IllegalArgumentException("Unknown package: " + packageName);
         }
@@ -36,10 +36,8 @@ public class CommandManager {
         for (Class<?> c : classes) {
             if (AbstractCommand.class.isAssignableFrom(c)
                     && !Modifier.isAbstract(c.getModifiers())) {
-                AbstractCommand cmd;
                 try {
-                    cmd = (AbstractCommand) c.newInstance();
-                    registerCommand(cmd);
+                    registerCommand((AbstractCommand) c.getDeclaredConstructor().newInstance());
                 } catch (Exception e) {
                     LogUtils.warning("can't register command for " + c.getName() + ": "
                             + e.getMessage());
@@ -168,8 +166,7 @@ public class CommandManager {
     }
 
     static List<String> noCompletions(CommandSender sender) {
-        if (sender instanceof Player) {
-            Player p = (Player) sender;
+        if (sender instanceof Player p) {
             p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 1.0f, 1.0f);
         }
         return EMPTY_STRING_LIST;

@@ -65,7 +65,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
         PluginManager pm = this.getServer().getPluginManager();
         pm.registerEvents(this, this);
 
-        getConfig().options().header("See https://dev.bukkit.org/projects/clicksort/pages/configuration");
+        getConfig().options().setHeader(List.of("See https://dev.bukkit.org/projects/clicksort/pages/configuration"));
         getConfig().options().copyDefaults(true);
         getConfig().set("log_level", null); // superseded by debug_level
         getConfig().set("autosave_seconds", null); // superseded by autopurge_seconds

@@ -4,7 +4,6 @@ import com.google.common.base.Joiner;
 import me.desht.dhutils.DHUtilsException;
 import me.desht.dhutils.Debugger;
 import me.desht.dhutils.MiscUtil;
-import org.apache.commons.lang.StringUtils;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
@@ -186,8 +185,7 @@ public abstract class AbstractCommand implements Comparable<AbstractCommand> {
             indent = "";
         } else {
             int l = prefix.length();
-            indent = sender instanceof Player ? StringUtils.repeat(" ", l + 2)
-                    : StringUtils.repeat(" ", l);
+            indent =  " ".repeat(sender instanceof Player ? l + 2 : l);
         }
 
         for (int i = 0; i < usage.length; i++) {
