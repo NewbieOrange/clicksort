@@ -31,12 +31,14 @@ import xyz.chengzi.clicksort.util.DurationUtil;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class PlayerSortingPrefs {
     private static final String SORT_PREFS_FILE_NAME = "sorting_prefs.sqlite";
     private final ClickSortPlugin plugin;
     private final Jdbi jdbi;
     private final long purgeAfter;
+    private final ReentrantLock purgeLock = new ReentrantLock();
 
     public PlayerSortingPrefs(ClickSortPlugin plugin) {
         this.plugin = plugin;
@@ -100,15 +102,24 @@ public class PlayerSortingPrefs {
 
     public void purge() {
         Debugger.getInstance().debug("purging player prefs unseen " + purgeAfter + " milliseconds");
-        long currentTimeMillis = System.currentTimeMillis();
-        jdbi.useHandle(handle -> {
-            PreparedBatch batch = handle.prepareBatch("delete from sorting_prefs where player = ?");
-            handle.createQuery("select player from sorting_prefs").mapTo(UUID.class).stream()
-                    .map(Bukkit::getOfflinePlayer).filter(o -> currentTimeMillis - o.getLastPlayed() >= purgeAfter)
-                    .map(OfflinePlayer::getUniqueId).forEach(batch::add);
-            batch.execute();
-            Debugger.getInstance().debug("purged " + batch.size() + " rows of unseen player data");
-        });
+        if (!purgeLock.tryLock()) {
+            Debugger.getInstance().debug("another purge is in progress, skipping");
+            return;
+        }
+
+        try {
+            long currentTimeMillis = System.currentTimeMillis();
+            jdbi.useHandle(handle -> {
+                PreparedBatch batch = handle.prepareBatch("delete from sorting_prefs where player = ?");
+                handle.createQuery("select player from sorting_prefs").mapTo(UUID.class).stream()
+                        .map(Bukkit::getOfflinePlayer).filter(o -> currentTimeMillis - o.getLastPlayed() >= purgeAfter)
+                        .map(OfflinePlayer::getUniqueId).forEach(batch::add);
+                batch.execute();
+                Debugger.getInstance().debug("purged " + batch.size() + " rows of unseen player data");
+            });
+        } finally {
+            purgeLock.unlock();
+        }
     }
 
     private class SortPrefs {
