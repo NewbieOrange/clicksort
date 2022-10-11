@@ -190,9 +190,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
                                 "shiftLeftToChange"));
             } else if (event.isRightClick()) {
                 // shift-right-clicking an empty slot cycles click method for the player
-                do {
-                    clickMethod = clickMethod.next();
-                } while (!clickMethod.isAvailable());
+                clickMethod = clickMethod.nextAvailable();
                 sortingPrefs.setClickMethod(player, clickMethod);
                 MiscUtil.statusMessage(player, clickMethod.getInstruction());
                 messager.message(player, "rightclick", 60,

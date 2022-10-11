@@ -11,6 +11,14 @@ public enum ClickMethod {
         return values()[o];
     }
 
+    public ClickMethod nextAvailable() {
+        ClickMethod method = this;
+        do {
+            method = method.next();
+        } while (method != this && !method.isAvailable());
+        return method;
+    }
+
     public boolean isAvailable() {
         return switch (this) {
             case MIDDLE -> CompatUtil.isMiddleClickAllowed();
