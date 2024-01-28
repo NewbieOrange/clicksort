@@ -209,16 +209,11 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
             default -> false;
         };
         if (shouldSort && shouldSort(viewToClickedInventory(event.getView(), event.getRawSlot()))) {
-            InventorySortEvent sortEvent = new InventorySortEvent(event.getView());
-            Bukkit.getPluginManager().callEvent(sortEvent);
-            if (!sortEvent.isCancelled()) {
-                sortInventory(event, sortMethod);
-                if (clickMethod.shouldCancelEvent()) {
-                    Bukkit.getScheduler().runTaskLater(this, () -> {
-                        player.getInventory().setItemInOffHand(player.getInventory().getItemInOffHand());
-                    }, 1L);
-                    event.setCancelled(true);
-                }
+            if (sortInventory(event, sortMethod) && clickMethod.shouldCancelEvent()) {
+                Bukkit.getScheduler().runTaskLater(this, () -> {
+                    player.getInventory().setItemInOffHand(player.getInventory().getItemInOffHand());
+                }, 1L);
+                event.setCancelled(true);
             }
         }
     }
@@ -288,7 +283,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
         }
     }
 
-    private void sortInventory(final InventoryClickEvent event, final SortingMethod sortMethod) {
+    private boolean sortInventory(final InventoryClickEvent event, final SortingMethod sortMethod) {
         Player p = (Player) event.getWhoClicked();
         int rawSlot = event.getRawSlot();
         int slot = event.getView().convertSlot(rawSlot);
@@ -317,13 +312,13 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
             if (slot < 9) {
                 // hotbar
                 if (!PermissionUtils.isAllowedTo(p, "clicksort.sort.hotbar")) {
-                    return;
+                    return false;
                 }
                 min = 0;
                 max = 9;
             } else {
                 if (!PermissionUtils.isAllowedTo(p, "clicksort.sort.player")) {
-                    return;
+                    return false;
                 }
                 // main player inventory
                 min = getConfig().getInt("player_sort_min");
@@ -332,22 +327,27 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
             }
         } else if (sortableInventories.contains(type)) {
             if (!PermissionUtils.isAllowedTo(p, "clicksort.sort.container")) {
-                return;
+                return false;
             }
             min = 0;
             max = inv.getSize();
         } else {
-            return;
+            return false;
         }
 
-        ItemStack[] items = inv.getContents();
-        List<ItemStack> sortedItems = sortAndMerge(items, min, max, sortMethod);
+        InventorySortEvent sortEvent = new InventorySortEvent(event.getView(), inv, min, max);
+        Bukkit.getPluginManager().callEvent(sortEvent);
+        if (sortEvent.isCancelled()) {
+            return false;
+        }
+
+        List<ItemStack> sortedItems = sortAndMerge(inv.getContents(), sortEvent.getSortableSlots(), sortMethod);
 
         int nItems = max - min;
 
         if (nItems < sortedItems.size() && !getConfig().getBoolean("drop_excess")) {
             MiscUtil.errorMessage(p, LanguageLoader.getColoredMessage("invOverFlow"));
-            return;
+            return false;
         }
 
         for (int i = 0; i < Math.min(nItems, sortedItems.size()); i++) {
@@ -370,19 +370,19 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
                 viewer.updateInventory();
             }
         }
+
+        return true;
     }
 
-    private List<ItemStack> sortAndMerge(ItemStack[] items, int min, int max, SortingMethod sortMethod) {
-        List<ItemStack> res = new ArrayList<>(max - min);
+    private List<ItemStack> sortAndMerge(ItemStack[] items, Set<Integer> sortableSlots, SortingMethod sortMethod) {
         Map<SortKey, Integer> amounts = new HashMap<>();
 
         // phase 1: extract a list of unique material/data/item-meta strings and
         // use those as keys
         // into a hash which maps items to quantities
-        int nItems = max - min;
-        Debugger.getInstance().debug("sortAndMerge: min = " + min + ", max = " + max + ", size = " + nItems);
-        for (int i = 0; i < nItems; i++) {
-            ItemStack is = items[min + i];
+        Debugger.getInstance().debug("sortAndMerge: sortable = " + sortableSlots + ", size = " + items.length);
+        for (int i : sortableSlots) {
+            ItemStack is = items[i];
             if (is != null) {
                 SortKey key = new SortKey(is, sortMethod);
                 if (amounts.containsKey(key)) {
@@ -398,6 +398,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 
         // phase 2: sort the extracted item keys and reconstruct the item stacks
         // from those keys
+        Deque<ItemStack> sorted = new LinkedList<>();
         for (SortKey sortKey : MiscUtil.asSortedList(amounts.keySet())) {
             int amount = amounts.get(sortKey);
             Debugger.getInstance().debug(2, "Process item [" + sortKey + "], amount = " + amount);
@@ -406,15 +407,20 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
             Debugger.getInstance().debug(2, "max stack size for " + mat + " = " + maxStack);
             if (maxStack != 0) {
                 while (amount > maxStack) {
-                    res.add(sortKey.toItemStack(maxStack));
+                    sorted.add(sortKey.toItemStack(maxStack));
                     amount -= maxStack;
                 }
-                res.add(sortKey.toItemStack(amount));
+                sorted.add(sortKey.toItemStack(amount));
             }
         }
 
-        while (res.size() < nItems) {
-            res.add(null);
+        List<ItemStack> res = new ArrayList<>(items.length);
+        for (int i = 0; i < items.length; i++) {
+            if (sortableSlots.contains(i)) {
+                res.add(sorted.pop());
+            } else {
+                res.add(items[i]);
+            }
         }
 
         return res;
