@@ -422,6 +422,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
                 res.add(items[i]);
             }
         }
+        res.addAll(sorted);
 
         return res;
     }
