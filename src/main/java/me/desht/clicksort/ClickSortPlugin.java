@@ -22,6 +22,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.AbstractHorse;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -329,7 +330,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
             if (!PermissionUtils.isAllowedTo(p, "clicksort.sort.container")) {
                 return false;
             }
-            min = 0;
+            min = inv.getHolder() instanceof AbstractHorse ? 2 : 0;
             max = inv.getSize();
         } else {
             return false;
