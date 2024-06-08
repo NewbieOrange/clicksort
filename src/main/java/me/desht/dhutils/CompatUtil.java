@@ -4,10 +4,9 @@ import org.bukkit.Bukkit;
 
 public class CompatUtil {
     public static int GetMinecraftSubVersion() {
-        String a = Bukkit.getServer().getClass().getPackage().getName();
-        String version = a.substring(a.lastIndexOf('.') + 1);
-        String[] subVersions = version.split("_");
-        return Integer.parseInt(subVersions[1]);
+        String minecraftVersion = Bukkit.getServer().getBukkitVersion().split("-")[0];
+        String subVersion = minecraftVersion.split("\\.")[1];
+        return Integer.parseInt(subVersion);
     }
 
     public static boolean isMaterialIdAllowed() {
