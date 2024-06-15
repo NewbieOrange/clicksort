@@ -342,27 +342,30 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
             return false;
         }
 
-        List<ItemStack> sortedItems = sortAndMerge(inv.getContents(), sortEvent.getSortableSlots(), sortMethod);
+        Set<Integer> sortableSlots = sortEvent.getSortableSlots();
+        List<ItemStack> sortedItems = sortAndMerge(inv.getContents(), sortableSlots, sortMethod);
 
-        int nItems = max - min;
-
-        if (nItems < sortedItems.size() && !getConfig().getBoolean("drop_excess")) {
+        if (sortableSlots.size() < sortedItems.size() && !getConfig().getBoolean("drop_excess")) {
             MiscUtil.errorMessage(p, LanguageLoader.getColoredMessage("invOverFlow"));
             return false;
         }
 
-        for (int i = 0; i < Math.min(nItems, sortedItems.size()); i++) {
-            ItemStack is = sortedItems.get(i);
-            inv.setItem(min + i, is);
+        for (int i : sortableSlots) {
+            if (!sortedItems.isEmpty()) {
+                ItemStack newItem = sortedItems.remove(0);
+                inv.setItem(i, newItem);
+            } else {
+                inv.clear(i);
+            }
         }
 
-        if (nItems < sortedItems.size()) {
+        if (!sortedItems.isEmpty()) {
             // This *shouldn't* happen, but there is a possibility if some other plugin has been messing
             // with max stack sizes, and we end up with an overflowing inventory after merging stacks.
             MiscUtil.alertMessage(p, LanguageLoader.getColoredMessage("dropItems"));
-            for (int i = nItems; i < sortedItems.size(); i++) {
-                Debugger.getInstance().debug("dropping " + sortedItems.get(i) + " by player " + p.getName());
-                p.getWorld().dropItemNaturally(p.getLocation(), sortedItems.get(i));
+            for (ItemStack item : sortedItems) {
+                Debugger.getInstance().debug("dropping " + item + " by player " + p.getName());
+                p.getWorld().dropItemNaturally(p.getLocation(), item);
             }
         }
 
@@ -399,7 +402,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
 
         // phase 2: sort the extracted item keys and reconstruct the item stacks
         // from those keys
-        Deque<ItemStack> sorted = new LinkedList<>();
+        List<ItemStack> sorted = new LinkedList<>();
         for (SortKey sortKey : MiscUtil.asSortedList(amounts.keySet())) {
             int amount = amounts.get(sortKey);
             Debugger.getInstance().debug(2, "Process item [" + sortKey + "], amount = " + amount);
@@ -415,17 +418,7 @@ public class ClickSortPlugin extends JavaPlugin implements Listener {
             }
         }
 
-        List<ItemStack> res = new ArrayList<>(items.length);
-        for (int i = 0; i < items.length; i++) {
-            if (sortableSlots.contains(i)) {
-                res.add(sorted.pop());
-            } else {
-                res.add(items[i]);
-            }
-        }
-        res.addAll(sorted);
-
-        return res;
+        return sorted;
     }
 
     private void checkNoNulls(Map<SortKey, Integer> amounts, ItemStack[] items) {
