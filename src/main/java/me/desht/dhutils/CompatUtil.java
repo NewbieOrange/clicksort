@@ -5,8 +5,9 @@ import org.bukkit.Bukkit;
 public class CompatUtil {
     public static int GetMinecraftSubVersion() {
         String minecraftVersion = Bukkit.getServer().getBukkitVersion().split("-")[0];
-        String subVersion = minecraftVersion.split("\\.")[1];
-        return Integer.parseInt(subVersion);
+        String[] parts = minecraftVersion.split("\\.");
+        // Old format: 1.X.Y → use X. New format: YEAR.MINOR.PATCH → use YEAR.
+        return Integer.parseInt(parts[0].equals("1") ? parts[1] : parts[0]);
     }
 
     public static boolean isMaterialIdAllowed() {
